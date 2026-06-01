@@ -2,14 +2,15 @@
   "name": "لوحة العائلة",
   "short_name": "عائلتي",
   "description": "نظام إدارة المهام والجداول العائلية",
-  "start_url": "/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f3eeff",
   "theme_color": "#5B247A",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "./icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
