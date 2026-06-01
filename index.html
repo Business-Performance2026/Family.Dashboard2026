@@ -280,7 +280,7 @@ textarea{resize:none;height:58px;}
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">📊</span><span>نظرة عامة</span></div>
       <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks"><span class="nav-icon">✅</span><span>المهام</span></div>
-      <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon">👥</span><span>الأشخاص</span></div>
+      <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon">👥</span><span>موكلو المهام</span></div>
       <div class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">🛡️</span><span>الإدارة</span></div>
       <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">📅</span><span>الجداول</span></div>
     </nav>
@@ -343,6 +343,17 @@ textarea{resize:none;height:58px;}
           <div class="panel-body" style="padding:12px 16px"><div id="today-schedule-list"></div></div>
         </div>
       </div>
+
+      <!-- موكلو المهام في النظرة العامة -->
+      <div class="content-grid wide" style="padding-bottom:28px">
+        <div class="panel fadeUp" style="animation-delay:.45s">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot" style="background:#8b5cf6"></div>موكلو المهام 👥</div>
+            <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('members')">إدارة الأشخاص</button>
+          </div>
+          <div class="panel-body"><div id="members-overview-list"></div></div>
+        </div>
+      </div>
     </div>
 
     <!-- TASKS -->
@@ -363,7 +374,7 @@ textarea{resize:none;height:58px;}
     <!-- MEMBERS -->
     <div id="page-members" class="hidden">
       <div class="page-header">
-        <div><div class="page-title">الأشخاص 👥</div><div class="page-sub">إدارة أفراد العائلة وتعيين المهام</div></div>
+        <div><div class="page-title">موكلو المهام 👥</div><div class="page-sub">إدارة الأشخاص وتوكيل المهام</div></div>
         <div><button class="btn-grad" onclick="openModal('member-modal')">＋ إضافة شخص</button></div>
       </div>
       <div class="content-grid wide" style="padding-bottom:28px">
@@ -517,6 +528,11 @@ const dn=new Date();
 $("today-date").textContent=DAYS_AR[dn.getDay()]+" — "+dn.toLocaleDateString("ar-SA");
 
 // ── INIT ──
+// ── ADMIN ── غيّر هذا لاسم حسابك الفعلي في التطبيق
+const ADMIN_USER = "mahmood";
+
+function isAdminUser(){ return clientId === ADMIN_USER; }
+
 (function init(){
   const saved=localStorage.getItem("fam_session");
   if(saved){startApp(saved);return;}
@@ -525,10 +541,6 @@ $("today-date").textContent=DAYS_AR[dn.getDay()]+" — "+dn.toLocaleDateString("
 
 function showLogin(){$("login-screen").classList.remove("hidden");$("register-screen").classList.add("hidden");}
 function showRegister(){$("register-screen").classList.remove("hidden");$("login-screen").classList.add("hidden");}
-
-// ── ADMIN CREDENTIALS ──
-const ADMIN_USER = "mahmood";
-const ADMIN_PASS_HASH = hashPass("!$M3hmood#");
 
 function doRegister(){
   const invite=($("reg-invite").value||"").trim().toUpperCase();
@@ -614,7 +626,54 @@ document.addEventListener("click",e=>{if(e.target.classList.contains("overlay"))
 function renderAll(){
   renderStats();renderDonut();renderBars();renderChildrenStars();
   renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
+  renderMembersOverview();
   if(isAdminUser&&isAdminUser()) renderAdminPage();
+}
+
+// ── MEMBERS OVERVIEW ──
+function renderMembersOverview(){
+  const el=$("members-overview-list");if(!el)return;el.innerHTML="";
+  const list=Object.values(members);
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div>لا يوجد أشخاص — أضف من قسم موكلو المهام</div></div>';
+    return;
+  }
+  const grid=document.createElement("div");
+  grid.style.cssText="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px";
+  list.forEach(m=>{
+    const all=Object.values(tasks).filter(t=>t.assignedTo===m.id);
+    const done=all.filter(t=>t.done).length;
+    const pending=all.filter(t=>!t.done).length;
+    const total=all.length;
+    const pct=total?Math.round(done/total*100):0;
+    const card=document.createElement("div");
+    card.style.cssText="background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .2s;cursor:pointer";
+    card.onmouseover=()=>card.style.borderColor="var(--border2)";
+    card.onmouseout=()=>card.style.borderColor="var(--border)";
+    card.onclick=()=>{ showPage('tasks'); setTimeout(()=>setTaskFilter(m.id),100); };
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:40px;height:40px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0">${esc(m.name).charAt(0)}</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${esc(m.name)}</div>
+          <div style="font-size:11px;color:var(--muted)">${total} مهمة مُوكّلة</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px">
+        <span>✅ ${done} منجزة</span>
+        <span>⏳ ${pending} متبقية</span>
+        <span style="font-weight:700;color:${m.color}">${pct}%</span>
+      </div>
+      <div style="background:#f0eaff;border-radius:6px;height:8px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${m.color};border-radius:6px;transition:width .6s ease"></div>
+      </div>
+      ${pending>0?`<div style="margin-top:10px;font-size:11px;color:var(--muted)">
+        ${Object.values(tasks).filter(t=>t.assignedTo===m.id&&!t.done).slice(0,2).map(t=>`<div style="padding:4px 8px;background:var(--card3);border-radius:7px;margin-top:4px;color:var(--text2)">📌 ${esc(t.title)}</div>`).join("")}
+      </div>`:""}
+    `;
+    grid.appendChild(card);
+  });
+  el.appendChild(grid);
 }
 
 // ── STATS ──
@@ -848,25 +907,24 @@ function applyDP(b,i){const a=i===selDay;b.style.background=a?"linear-gradient(1
 function buildQuickSubj(){const qs=$("quick-subj");if(!qs)return;qs.innerHTML="";Object.entries(SI).forEach(([s,icon])=>{const b=document.createElement("button");b.className="subj-btn";b.textContent=icon+" "+s;b.onclick=()=>{$("sf-subject").value=s;};qs.appendChild(b);});}
 function scheduleNotifs(){Object.values(notifTimers).forEach(clearTimeout);notifTimers={};Object.values(tasks).forEach(t=>{if(t.done||!t.date||!t.time)return;const diff=new Date(t.date+"T"+t.time).getTime()-Date.now()-300000;if(diff>0)notifTimers[t.id]=setTimeout(()=>{if(typeof Notification!=="undefined"&&Notification.permission==="granted")new Notification("⏰ "+t.title,{body:"بعد 5 دقائق!"});toast("⏰ "+t.title+" — بعد 5 دقائق!");},diff);});}
 function addSlot(){if(!activeChild)return;const from=$("sf-from").value,to=$("sf-to").value,subject=$("sf-subject").value.trim();if(!from||!to||!subject){toast("⚠️ يرجى تعبئة الوقت والنشاط");return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+activeChild+"/"+id).set({id,day:selDay,from,to,subject});$("sf-from").value="";$("sf-to").value="";$("sf-subject").value="";closeModal("slot-modal");toast("📅 تمت إضافة النشاط!");}
-// ── ADMIN ──
-function isAdminUser(){return clientId===ADMIN_USER;}
+// ── ADMIN PAGE RENDER ──
 
 function generateCodes(count){
   if(!isAdminUser()){toast("⛔ هذه الميزة للمدير فقط");return;}
   const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let generated=0;
+  const batch={};
   for(let i=0;i<count;i++){
-    let code="";
+    let code="SC-";
     for(let j=0;j<8;j++) code+=chars[Math.floor(Math.random()*chars.length)];
-    code="SC-"+code; // SC = SmartClick prefix
-    db.ref("inviteCodes/"+code).once("value",snap=>{
-      if(!snap.exists()){
-        db.ref("inviteCodes/"+code).set({code,used:false,created:Date.now()});
-        generated++;
-      }
-    });
+    batch[code]={code,used:false,created:Date.now()};
   }
-  setTimeout(()=>toast("✅ تم توليد "+count+" كود جديد!"),500);
+  db.ref("inviteCodes").update(batch).then(()=>{
+    toast("✅ تم توليد "+count+" كود جديد!");
+    renderAdminPage();
+  }).catch(e=>{
+    toast("❌ خطأ: "+e.message);
+    console.error(e);
+  });
 }
 
 function renderAdminPage(){
