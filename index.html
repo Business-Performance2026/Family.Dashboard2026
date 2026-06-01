@@ -179,6 +179,13 @@ textarea{resize:none;height:58px;}
 .day-pill{flex:1;min-width:0;padding:7px 2px;border-radius:9px;cursor:pointer;font-size:10px;font-family:inherit;font-weight:700;background:var(--card2);border:1.5px solid var(--border);color:var(--muted);transition:all .15s;text-align:center;}
 #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:12px 22px;font-size:13px;color:var(--text);box-shadow:0 16px 50px #5B247A28;opacity:0;transition:all .35s;z-index:999;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.member-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;flex-shrink:0;}
+.member-row{display:flex;gap:12px;align-items:center;padding:12px 16px;background:var(--card2);border-radius:13px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s;}
+.member-row:hover{border-color:var(--border2);background:var(--card3);}
+.task-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.task-filter-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--card2);color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.task-filter-btn:hover{border-color:var(--border2);}
+.task-filter-btn.active{background:linear-gradient(135deg,#f5eeff,#edfcff);border-color:var(--grad-start);color:var(--grad-start);}
 .empty-state{text-align:center;color:var(--dim);padding:34px 0;font-size:13px;}
 .empty-icon{font-size:38px;margin-bottom:10px;}
 .hidden{display:none!important;}
@@ -238,6 +245,7 @@ textarea{resize:none;height:58px;}
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">📊</span><span>نظرة عامة</span></div>
       <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks"><span class="nav-icon">✅</span><span>المهام</span></div>
+      <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon">👥</span><span>الأشخاص</span></div>
       <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">📅</span><span>الجداول</span></div>
     </nav>
     <div class="sidebar-bottom">
@@ -308,6 +316,7 @@ textarea{resize:none;height:58px;}
         <div><div class="page-title">المهام ✅</div><div class="page-sub">إدارة وتتبع مهامك اليومية</div></div>
         <div><button class="btn-grad" onclick="openModal('task-modal')">＋ إضافة مهمة</button></div>
       </div>
+      <div style="padding:14px 28px 0"><div class="task-filter-row" id="task-filter-row"><button class="task-filter-btn active" data-filter="all" onclick="setTaskFilter('all')">الكل</button></div></div>
       <div class="content-grid wide" style="padding-bottom:0">
         <div class="panel fadeUp"><div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:#ea580c"></div>المهام حسب الأولوية</div></div><div class="panel-body"><div class="bar-chart" id="priority-bars-2"></div></div></div>
       </div>
@@ -340,9 +349,32 @@ textarea{resize:none;height:58px;}
         </div>
       </div>
     </div>
+  <!-- MEMBERS PAGE -->
+    <div id="page-members" class="hidden">
+      <div class="page-header">
+        <div><div class="page-title">الأشخاص 👥</div><div class="page-sub">إدارة أفراد العائلة وتعيين المهام</div></div>
+        <div><button class="btn-grad" onclick="openModal('member-modal')">＋ إضافة شخص</button></div>
+      </div>
+      <div class="content-grid wide" style="padding-bottom:28px">
+        <div class="panel fadeUp">
+          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:var(--grad-start)"></div>أفراد العائلة</div></div>
+          <div class="panel-body"><div id="members-list"></div></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <!-- MODALS -->
+<div id="member-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">👤 إضافة شخص <button class="modal-close" onclick="closeModal('member-modal')">✕</button></div>
+    <div class="form-col">
+      <div><div class="field-label">الاسم *</div><input type="text" id="mem-name" placeholder="اسم الشخص"/></div>
+      <div><div class="field-label">اللون</div><div class="color-row" id="member-color-picker"></div></div>
+    </div>
+    <button class="save-btn" style="margin-top:14px" onclick="addMember()">💾 إضافة الشخص</button>
+  </div>
+</div>
 <div id="task-modal" class="overlay hidden">
   <div class="modal">
     <div class="modal-title">➕ مهمة جديدة <button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
@@ -354,6 +386,7 @@ textarea{resize:none;height:58px;}
         <div style="flex:1"><div class="field-label">الوقت</div><input type="time" id="tf-time"/></div>
       </div>
       <div><div class="field-label">الأولوية</div><div class="p-btns" id="priority-btns"></div></div>
+      <div><div class="field-label">المسؤول (اختياري)</div><div id="task-assign-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
     </div>
     <button class="save-btn" style="margin-top:14px" onclick="addTask()">💾 حفظ المهمة</button>
   </div>
@@ -567,6 +600,179 @@ function addChild(){const name=$("cf-name").value.trim();if(!name){$("cf-name").
 function deleteChild(id){if(!confirm("حذف هذا الطفل وجدوله ونجومه؟"))return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).remove();db.ref("clients/"+clientId+"/schedules/"+id).remove();db.ref("clients/"+clientId+"/stars/"+id).remove();}
 function addSlot(){if(!activeChild)return;const from=$("sf-from").value,to=$("sf-to").value,subject=$("sf-subject").value.trim();if(!from||!to||!subject){toast("⚠️ يرجى تعبئة الوقت والنشاط");return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+activeChild+"/"+id).set({id,day:selDay,from,to,subject});$("sf-from").value="";$("sf-to").value="";$("sf-subject").value="";closeModal("slot-modal");toast("📅 تمت إضافة النشاط!");}
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
+
+// ── MEMBERS ──
+let members={}, selMemberColor="#5B247A", taskFilter="all", selAssign=null;
+
+// add member firebase listener in startApp - we patch renderAll
+const _origRenderAll = null;
+
+function initMembersListener(){
+  db.ref("clients/"+clientId+"/members").on("value",snap=>{
+    members=snap.val()||{};
+    renderAll();
+  });
+}
+
+function addMember(){
+  const name=$("mem-name").value.trim();if(!name){$("mem-name").focus();return;}
+  const id=uid();setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/members/"+id).set({id,name,color:selMemberColor});
+  $("mem-name").value="";
+  closeModal("member-modal");toast("👤 تمت إضافة "+name+"!");
+}
+function deleteMember(id){
+  if(!confirm("حذف هذا الشخص؟"))return;
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/members/"+id).remove();
+}
+
+function buildMemberColorPicker(){
+  const row=$("member-color-picker");if(!row)return;row.innerHTML="";
+  COLORS.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="color-dot"+(c===selMemberColor?" selected":"");
+    b.style.background=c;
+    b.onclick=()=>{selMemberColor=c;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===c));};
+    row.appendChild(b);
+  });
+}
+
+function buildTaskAssignBtns(){
+  const row=$("task-assign-btns");if(!row)return;row.innerHTML="";
+  // none option
+  const none=document.createElement("button");
+  none.style.cssText=`padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;border:1.5px solid ${selAssign===null?"var(--grad-start)":"var(--border2)"};background:${selAssign===null?"linear-gradient(135deg,#f5eeff,#edfcff)":"var(--card2)"};color:${selAssign===null?"var(--grad-start)":"var(--muted)"}`;
+  none.textContent="بدون";
+  none.onclick=()=>{selAssign=null;buildTaskAssignBtns();};
+  row.appendChild(none);
+  Object.values(members).forEach(m=>{
+    const b=document.createElement("button");
+    const active=selAssign===m.id;
+    b.style.cssText=`padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;border:1.5px solid ${active?m.color:"var(--border2)"};background:${active?m.color+"22":"var(--card2)"};color:${active?m.color:"var(--muted)"};display:flex;align-items:center;gap:5px`;
+    b.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${esc(m.name)}`;
+    b.onclick=()=>{selAssign=m.id;buildTaskAssignBtns();};
+    row.appendChild(b);
+  });
+}
+
+function setTaskFilter(filter){
+  taskFilter=filter;
+  document.querySelectorAll(".task-filter-btn").forEach(b=>b.classList.toggle("active",b.dataset.filter===filter));
+  renderAllTasks();
+}
+
+function buildTaskFilterRow(){
+  const row=$("task-filter-row");if(!row)return;
+  row.innerHTML='<button class="task-filter-btn'+(taskFilter==="all"?" active":"") +'" data-filter="all" onclick="setTaskFilter('all')">الكل</button>';
+  Object.values(members).forEach(m=>{
+    const b=document.createElement("button");
+    b.className="task-filter-btn"+(taskFilter===m.id?" active":"");
+    b.dataset.filter=m.id;
+    b.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${esc(m.name)}`;
+    b.onclick=()=>setTaskFilter(m.id);
+    row.appendChild(b);
+  });
+}
+
+function renderMembersPage(){
+  const el=$("members-list");if(!el)return;el.innerHTML="";
+  const list=Object.values(members);
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div>لا يوجد أشخاص — اضغط + لإضافة شخص</div></div>';
+    return;
+  }
+  list.forEach(m=>{
+    const taskCount=Object.values(tasks).filter(t=>t.assignedTo===m.id).length;
+    const doneCount=Object.values(tasks).filter(t=>t.assignedTo===m.id&&t.done).length;
+    const pct=taskCount?Math.round(doneCount/taskCount*100):0;
+    const row=document.createElement("div");row.className="member-row";
+    row.innerHTML=`
+      <div class="member-avatar" style="background:${m.color}">${esc(m.name).charAt(0)}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">${esc(m.name)}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="flex:1;height:7px;background:#f0eaff;border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${m.color};border-radius:4px;transition:width .6s ease"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);white-space:nowrap">${doneCount}/${taskCount} مهمة · ${pct}%</span>
+        </div>
+      </div>
+      <button onclick="deleteMember('${m.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>`;
+    el.appendChild(row);
+  });
+}
+
+// Override addTask to include assignedTo
+const _origAddTask = addTask;
+addTask = function(){
+  const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}
+  const id=uid();setSync("syncing","جاري الحفظ...");
+  const taskData={id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false};
+  if(selAssign) taskData.assignedTo=selAssign;
+  db.ref("clients/"+clientId+"/tasks/"+id).set(taskData);
+  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");
+  selPriority="medium";selAssign=null;buildPriorityBtns();buildTaskAssignBtns();
+  closeModal("task-modal");toast("✅ تمت إضافة المهمة!");
+};
+
+// Override renderAllTasks to show assigned person + filter
+const _origRenderAllTasks = renderAllTasks;
+renderAllTasks = function(){
+  buildTaskFilterRow();
+  const el=$("all-tasks-list");if(!el)return;el.innerHTML="";
+  let l=Object.values(tasks);
+  if(taskFilter!=="all") l=l.filter(t=>t.assignedTo===taskFilter);
+  if(!l.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><div>لا توجد مهام</div></div>';return;}
+  l.forEach(t=>{
+    const p=PC[t.priority]||PC.medium;
+    const m=t.assignedTo?members[t.assignedTo]:null;
+    const d=document.createElement("div");d.className="task-row"+(t.done?" done-row":"");d.style.borderRight="3px solid "+p.color;
+    d.innerHTML=`<button class="chk" onclick="toggleTask('${t.id}')">${t.done?"✅":"⬜"}</button>
+    <div style="flex:1">
+      <div class="task-text${t.done?" done":""}">${esc(t.title)}</div>
+      <div class="task-info" style="display:flex;align-items:center;gap:8px;margin-top:3px">
+        ${t.date?"📅 "+t.date:""}${t.time?" ⏰ "+t.time:""}
+        ${m?`<span style="background:${m.color}22;color:${m.color};border-radius:8px;padding:1px 8px;font-size:10px;font-weight:700">👤 ${esc(m.name)}</span>`:""}
+      </div>
+    </div>
+    <span class="p-pill" style="background:${p.bg};color:${p.color}">${p.label}</span>
+    <button class="del-x" onclick="deleteTask('${t.id}')">✕</button>`;
+    el.appendChild(d);
+  });
+};
+
+// Override showPage to handle members
+const _origShowPage = showPage;
+showPage = function(p){
+  ["overview","tasks","schedule","members"].forEach(id=>{
+    const pel=$("page-"+id);if(pel)pel.classList.toggle("hidden",id!==p);
+    const nel=$("nav-"+id);if(nel)nel.classList.toggle("active",id===p);
+  });
+  if(p==="tasks"){buildTaskAssignBtns();}
+  renderAll();
+};
+
+// Override renderAll to include members
+const _origRA = renderAll;
+renderAll = function(){
+  renderStats();renderDonut();renderBars();renderChildrenStars();renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
+};
+
+// Override openModal to rebuild assign btns when task modal opens
+const _origOpenModal = openModal;
+openModal = function(id){
+  document.getElementById(id).classList.remove("hidden");
+  if(id==="task-modal"){buildTaskAssignBtns();}
+  if(id==="member-modal"){buildMemberColorPicker();}
+};
+
+// Init members listener after startApp
+const _origStartApp = startApp;
+startApp = function(id){
+  _origStartApp(id);
+  initMembersListener();
+};
 </script>
 </body>
 </html>
