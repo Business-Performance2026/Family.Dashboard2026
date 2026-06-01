@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B247A"/>
+      <stop offset="100%" stop-color="#1BCEDF"/>
+    </linearGradient>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b3fa0"/>
+      <stop offset="100%" stop-color="#34d9ec"/>
+    </linearGradient>
+  </defs>
+  <!-- خلفية دائرية -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <!-- البيت -->
+  <g transform="translate(256,256)">
+    <!-- السقف -->
+    <polygon points="0,-130 150,10 -150,10" fill="white" opacity="0.95"/>
+    <!-- الجسم -->
+    <rect x="-105" y="10" width="210" height="140" rx="8" fill="white" opacity="0.95"/>
+    <!-- الباب -->
+    <rect x="-30" y="70" width="60" height="80" rx="8" fill="url(#bg2)"/>
+    <!-- نقطة مقبض -->
+    <circle cx="22" cy="112" r="5" fill="white"/>
+    <!-- نافذة يسار -->
+    <rect x="-90" y="30" width="50" height="45" rx="6" fill="url(#bg2)" opacity="0.9"/>
+    <line x1="-65" y1="30" x2="-65" y2="75" stroke="white" stroke-width="2.5"/>
+    <line x1="-90" y1="52" x2="-40" y2="52" stroke="white" stroke-width="2.5"/>
+    <!-- نافذة يمين -->
+    <rect x="40" y="30" width="50" height="45" rx="6" fill="url(#bg2)" opacity="0.9"/>
+    <line x1="65" y1="30" x2="65" y2="75" stroke="white" stroke-width="2.5"/>
+    <line x1="40" y1="52" x2="90" y2="52" stroke="white" stroke-width="2.5"/>
+    <!-- نجمة صغيرة فوق السقف -->
+    <text x="0" y="-148" text-anchor="middle" font-size="36" fill="#FFD700">⭐</text>
+  </g>
+</svg>
