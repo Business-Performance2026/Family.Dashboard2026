@@ -33,34 +33,37 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-@keyframes slideRight{from{opacity:0;transform:translateX(-14px);}to{opacity:1;transform:translateX(0);}}
-@keyframes starBounce{0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(1);}}
 .fadeUp{animation:fadeUp .4s ease forwards;}.fadeIn{animation:fadeIn .3s ease forwards;}
+
+/* AUTH */
 .auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;z-index:1;}
 .auth-box{background:var(--card);border-radius:28px;padding:44px 40px;width:100%;max-width:420px;text-align:center;box-shadow:0 40px 100px #5B247A22,0 0 0 1px var(--border);animation:fadeUp .5s ease;position:relative;overflow:hidden;}
 .auth-box::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--grad);}
-.auth-logo{font-size:58px;margin-bottom:14px;filter:drop-shadow(0 4px 16px #5B247A44);}
+.auth-logo{font-size:58px;margin-bottom:14px;}
 .auth-title{font-size:24px;font-weight:900;background:var(--grad);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
 .auth-sub{color:var(--muted);font-size:13px;margin-bottom:26px;line-height:1.8;}
 .auth-input{background:#faf8ff;border:2px solid var(--border2);border-radius:13px;padding:13px 16px;color:var(--text);font-size:15px;font-family:inherit;outline:none;width:100%;margin-bottom:10px;transition:all .25s;text-align:right;}
 .auth-input:focus{border-color:var(--grad-start);box-shadow:0 0 0 4px #5B247A12;}
 .auth-btn{width:100%;background:var(--grad);color:#fff;border:none;border-radius:13px;padding:14px;cursor:pointer;font-size:15px;font-weight:900;font-family:inherit;transition:all .25s;box-shadow:0 8px 28px #5B247A44;margin-top:4px;}
-.auth-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px #1BCEDF44;}
+.auth-btn:hover{transform:translateY(-2px);}
 .auth-switch{margin-top:18px;font-size:13px;color:var(--muted);}
-.auth-switch a{color:var(--grad-start);cursor:pointer;font-weight:700;text-decoration:none;}
-.auth-switch a:hover{text-decoration:underline;}
+.auth-switch a{color:var(--grad-start);cursor:pointer;font-weight:700;}
 .auth-error{background:#fee2e2;color:var(--red);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:10px;display:none;}
 .auth-error.show{display:block;}
 .auth-hint{color:var(--dim);font-size:11px;margin-top:14px;line-height:2;}
+
+/* SYNC */
 #sync-bar{display:flex;align-items:center;gap:8px;padding:6px 24px;font-size:11px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);color:var(--muted);position:relative;z-index:1;}
 #sync-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:background .3s;}
-#sync-bar.online  #sync-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+#sync-bar.online #sync-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
 #sync-bar.syncing #sync-dot{background:var(--grad-start);animation:pulse .8s infinite;}
 #sync-bar.offline #sync-dot{background:var(--red);}
+
+/* SIDEBAR */
 #sidebar{position:fixed;right:0;top:0;bottom:0;width:224px;background:var(--sidebar-bg);z-index:100;display:flex;flex-direction:column;box-shadow:4px 0 30px #5B247A33;}
 #sidebar::before{content:'';position:absolute;bottom:0;left:0;right:0;height:200px;background:radial-gradient(ellipse at 50% 100%,#1BCEDF22,transparent 70%);pointer-events:none;}
 .sidebar-logo{padding:26px 20px 20px;border-bottom:1px solid #ffffff15;}
-.sidebar-logo-icon{font-size:30px;margin-bottom:5px;filter:drop-shadow(0 2px 10px #1BCEDF88);}
+.sidebar-logo-icon{font-size:30px;margin-bottom:5px;}
 .sidebar-logo-text{font-size:16px;font-weight:900;color:#fff;}
 .sidebar-client{font-size:11px;color:#ffffff88;margin-top:4px;display:flex;align-items:center;gap:5px;}
 .sidebar-client span{background:#ffffff18;border:1px solid #ffffff28;border-radius:8px;padding:2px 9px;color:#1BCEDF;font-size:11px;}
@@ -72,11 +75,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .sidebar-bottom{padding:14px 12px;border-top:1px solid #ffffff15;}
 .logout-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:12px;color:#ffffff66;background:none;border:1px solid transparent;font-family:inherit;width:100%;transition:all .2s;}
 .logout-btn:hover{color:#fff;background:#ffffff15;}
+
+/* LAYOUT */
 #app-wrap{margin-right:224px;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1;}
 #sync-bar-wrap{position:sticky;top:0;z-index:99;}
 .page-header{padding:26px 28px 0;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;}
 .page-title{font-size:22px;font-weight:900;color:var(--text);}
 .page-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+
+/* CARDS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 28px 0;}
 .stat-card{background:var(--card);border-radius:18px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden;transition:all .25s;}
 .stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
@@ -92,6 +99,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .panel-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--text);}
 .panel-dot{width:9px;height:9px;border-radius:50%;}
 .panel-body{padding:18px;background:var(--card);}
+
+/* CHARTS */
 .donut-wrap{display:flex;align-items:center;gap:22px;}
 .donut-center{position:relative;width:120px;height:120px;flex-shrink:0;}
 .donut-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
@@ -108,26 +117,42 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .bar-track{flex:1;height:10px;background:#f0eaff;border-radius:6px;overflow:hidden;}
 .bar-fill{height:100%;border-radius:6px;transition:width .8s cubic-bezier(.22,1,.36,1);}
 .bar-val{width:26px;text-align:left;font-size:11px;font-weight:700;flex-shrink:0;}
+
+/* ACTIVITY */
 .activity-item{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);}
 .activity-item:last-child{border-bottom:none;}
 .activity-dot{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .activity-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
 .activity-meta{font-size:11px;color:var(--muted);}
+
+/* STARS */
 .child-star-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--card2);border-radius:13px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s;}
 .child-star-row:hover{border-color:var(--border2);}
 .child-star-name{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
 .star-badge{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid #fcd34d;border-radius:12px;padding:4px 12px;font-size:12px;font-weight:800;}
-.task-list-panel{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;}
+
+/* TASKS */
+.task-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.task-filter-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--card2);color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.task-filter-btn.active{background:linear-gradient(135deg,#f5eeff,#edfcff);border-color:var(--grad-start);color:var(--grad-start);}
+.task-list-panel{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;}
 .task-row{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--card2);border-radius:13px;transition:all .2s;border:1px solid var(--border);}
 .task-row:hover{background:var(--card3);border-color:var(--border2);}
 .task-row.done-row{opacity:.5;}
 .chk{background:none;border:none;cursor:pointer;font-size:19px;padding:0;flex-shrink:0;}
 .task-text{flex:1;font-size:13px;font-weight:600;color:var(--text);}
 .task-text.done{text-decoration:line-through;color:var(--muted);}
-.task-info{font-size:11px;color:var(--muted);margin-top:2px;}
+.task-info{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .p-pill{font-size:10px;padding:3px 9px;border-radius:7px;font-weight:700;flex-shrink:0;}
 .del-x{background:none;border:none;cursor:pointer;font-size:14px;color:var(--dim);padding:0;transition:color .2s;}
 .del-x:hover{color:var(--red);}
+
+/* MEMBERS */
+.member-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;}
+.member-row{display:flex;gap:12px;align-items:center;padding:13px 16px;background:var(--card2);border-radius:13px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s;}
+.member-row:hover{border-color:var(--border2);background:var(--card3);}
+
+/* SCHEDULE */
 .child-tab-row{display:flex;gap:6px;padding:0 28px;flex-wrap:wrap;margin-bottom:-14px;}
 .ctab{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;transition:all .2s;box-shadow:var(--shadow);}
 .ctab:hover{border-color:var(--border2);}
@@ -147,13 +172,17 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .del-slot{position:absolute;top:3px;left:3px;background:#fee2e2;border:none;border-radius:5px;color:var(--red);cursor:pointer;font-size:9px;padding:2px 4px;opacity:0;transition:opacity .2s;}
 .fw-slot:hover .del-slot{opacity:1;}
 .fw-empty{text-align:center;color:var(--dim);padding:16px 0;font-size:20px;}
+
+/* BUTTONS */
 .btn-grad{background:var(--grad);color:#fff;border:none;border-radius:12px;padding:9px 18px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;transition:all .22s;box-shadow:0 4px 16px #5B247A33;display:flex;align-items:center;gap:6px;}
 .btn-grad:hover{transform:translateY(-2px);box-shadow:0 8px 24px #1BCEDF44;}
 .btn-outline{background:#fff;color:var(--grad-start);border:1.5px solid var(--border2);border-radius:11px;padding:7px 13px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;transition:all .2s;}
 .btn-outline:hover{background:var(--card2);}
 .btn-danger{background:#fee2e2;color:var(--red);border:1px solid #fca5a5;border-radius:11px;padding:7px 13px;cursor:pointer;font-size:12px;font-family:inherit;}
+
+/* MODAL */
 .overlay{position:fixed;inset:0;background:#5B247A55;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease;backdrop-filter:blur(5px);}
-.modal{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:28px;width:100%;max-width:460px;box-shadow:0 40px 100px #5B247A33;animation:fadeUp .3s ease;position:relative;overflow:hidden;}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:28px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 100px #5B247A33;animation:fadeUp .3s ease;position:relative;}
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad);}
 .modal-title{font-size:16px;font-weight:900;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;color:var(--text);}
 .modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted);padding:0;}
@@ -177,18 +206,14 @@ textarea{resize:none;height:58px;}
 .subj-btn:hover{background:var(--card3);}
 .day-picker{display:flex;gap:4px;flex-wrap:wrap;}
 .day-pill{flex:1;min-width:0;padding:7px 2px;border-radius:9px;cursor:pointer;font-size:10px;font-family:inherit;font-weight:700;background:var(--card2);border:1.5px solid var(--border);color:var(--muted);transition:all .15s;text-align:center;}
+
+/* TOAST */
 #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:12px 22px;font-size:13px;color:var(--text);box-shadow:0 16px 50px #5B247A28;opacity:0;transition:all .35s;z-index:999;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.member-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;flex-shrink:0;}
-.member-row{display:flex;gap:12px;align-items:center;padding:12px 16px;background:var(--card2);border-radius:13px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s;}
-.member-row:hover{border-color:var(--border2);background:var(--card3);}
-.task-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-.task-filter-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--card2);color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:5px;}
-.task-filter-btn:hover{border-color:var(--border2);}
-.task-filter-btn.active{background:linear-gradient(135deg,#f5eeff,#edfcff);border-color:var(--grad-start);color:var(--grad-start);}
 .empty-state{text-align:center;color:var(--dim);padding:34px 0;font-size:13px;}
 .empty-icon{font-size:38px;margin-bottom:10px;}
 .hidden{display:none!important;}
+
 @media(max-width:900px){
   #sidebar{width:62px;}
   .sidebar-logo-text,.sidebar-client,.nav-item span,.logout-label{display:none;}
@@ -209,6 +234,8 @@ textarea{resize:none;height:58px;}
 </head>
 <body>
 <div id="toast"></div>
+
+<!-- شاشة التسجيل -->
 <div id="register-screen" class="auth-screen hidden">
   <div class="auth-box">
     <div class="auth-logo">🏠</div>
@@ -222,6 +249,8 @@ textarea{resize:none;height:58px;}
     <div class="auth-switch">عندك حساب؟ <a onclick="showLogin()">سجّل دخول</a></div>
   </div>
 </div>
+
+<!-- شاشة الدخول -->
 <div id="login-screen" class="auth-screen hidden">
   <div class="auth-box">
     <div class="auth-logo">🔑</div>
@@ -235,6 +264,8 @@ textarea{resize:none;height:58px;}
     <div class="auth-hint">🔒 كل حساب = لوحة خاصة ومنفصلة<br/>🔄 تتزامن على كل أجهزتك</div>
   </div>
 </div>
+
+<!-- التطبيق -->
 <div id="app" class="hidden">
   <div id="sidebar">
     <div class="sidebar-logo">
@@ -252,10 +283,13 @@ textarea{resize:none;height:58px;}
       <button class="logout-btn" onclick="doLogout()"><span>🚪</span><span class="logout-label">تسجيل خروج</span></button>
     </div>
   </div>
+
   <div id="app-wrap">
     <div id="sync-bar-wrap">
       <div id="sync-bar" class="syncing"><div id="sync-dot"></div><span id="sync-txt">جاري الاتصال...</span></div>
     </div>
+
+    <!-- OVERVIEW -->
     <div id="page-overview">
       <div class="page-header">
         <div><div class="page-title">نظرة عامة 📊</div><div class="page-sub" id="today-date"></div></div>
@@ -296,27 +330,23 @@ textarea{resize:none;height:58px;}
       </div>
       <div class="content-grid" style="padding-bottom:28px">
         <div class="panel fadeUp" style="animation-delay:.35s">
-          <div class="panel-head">
-            <div class="panel-title"><div class="panel-dot" style="background:var(--star)"></div>نجوم الأطفال ⭐</div>
-            <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('schedule')">إدارة الجداول</button>
-          </div>
+          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:var(--star)"></div>نجوم الأطفال ⭐</div><button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('schedule')">إدارة الجداول</button></div>
           <div class="panel-body"><div id="children-stars-overview"></div></div>
         </div>
         <div class="panel fadeUp" style="animation-delay:.4s">
-          <div class="panel-head">
-            <div class="panel-title"><div class="panel-dot" style="background:#1BCEDF"></div>جدول اليوم</div>
-            <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('schedule')">عرض الكل</button>
-          </div>
+          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:#1BCEDF"></div>جدول اليوم</div><button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('schedule')">عرض الكل</button></div>
           <div class="panel-body" style="padding:12px 16px"><div id="today-schedule-list"></div></div>
         </div>
       </div>
     </div>
+
+    <!-- TASKS -->
     <div id="page-tasks" class="hidden">
       <div class="page-header">
         <div><div class="page-title">المهام ✅</div><div class="page-sub">إدارة وتتبع مهامك اليومية</div></div>
         <div><button class="btn-grad" onclick="openModal('task-modal')">＋ إضافة مهمة</button></div>
       </div>
-      <div style="padding:14px 28px 0"><div class="task-filter-row" id="task-filter-row"><button class="task-filter-btn active" data-filter="all" onclick="setTaskFilter('all')">الكل</button></div></div>
+      <div style="padding:14px 28px 0"><div class="task-filter-row" id="task-filter-row"></div></div>
       <div class="content-grid wide" style="padding-bottom:0">
         <div class="panel fadeUp"><div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:#ea580c"></div>المهام حسب الأولوية</div></div><div class="panel-body"><div class="bar-chart" id="priority-bars-2"></div></div></div>
       </div>
@@ -324,6 +354,22 @@ textarea{resize:none;height:58px;}
         <div class="panel fadeUp"><div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:var(--grad-start)"></div>قائمة المهام</div></div><div class="panel-body"><div class="task-list-panel" id="all-tasks-list"></div></div></div>
       </div>
     </div>
+
+    <!-- MEMBERS -->
+    <div id="page-members" class="hidden">
+      <div class="page-header">
+        <div><div class="page-title">الأشخاص 👥</div><div class="page-sub">إدارة أفراد العائلة وتعيين المهام</div></div>
+        <div><button class="btn-grad" onclick="openModal('member-modal')">＋ إضافة شخص</button></div>
+      </div>
+      <div class="content-grid wide" style="padding-bottom:28px">
+        <div class="panel fadeUp">
+          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:var(--grad-start)"></div>أفراد العائلة</div></div>
+          <div class="panel-body"><div id="members-list"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
     <div id="page-schedule" class="hidden">
       <div class="page-header">
         <div><div class="page-title">الجداول 📅</div><div class="page-sub">جداول الأطفال الأسبوعية</div></div>
@@ -349,21 +395,10 @@ textarea{resize:none;height:58px;}
         </div>
       </div>
     </div>
-  <!-- MEMBERS PAGE -->
-    <div id="page-members" class="hidden">
-      <div class="page-header">
-        <div><div class="page-title">الأشخاص 👥</div><div class="page-sub">إدارة أفراد العائلة وتعيين المهام</div></div>
-        <div><button class="btn-grad" onclick="openModal('member-modal')">＋ إضافة شخص</button></div>
-      </div>
-      <div class="content-grid wide" style="padding-bottom:28px">
-        <div class="panel fadeUp">
-          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:var(--grad-start)"></div>أفراد العائلة</div></div>
-          <div class="panel-body"><div id="members-list"></div></div>
-        </div>
-      </div>
-    </div>
+
   </div>
 </div>
+
 <!-- MODALS -->
 <div id="member-modal" class="overlay hidden">
   <div class="modal">
@@ -386,7 +421,7 @@ textarea{resize:none;height:58px;}
         <div style="flex:1"><div class="field-label">الوقت</div><input type="time" id="tf-time"/></div>
       </div>
       <div><div class="field-label">الأولوية</div><div class="p-btns" id="priority-btns"></div></div>
-      <div><div class="field-label">المسؤول (اختياري)</div><div id="task-assign-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+      <div><div class="field-label">المسؤول (اختياري)</div><div id="task-assign-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div></div>
     </div>
     <button class="save-btn" style="margin-top:14px" onclick="addTask()">💾 حفظ المهمة</button>
   </div>
@@ -417,18 +452,23 @@ textarea{resize:none;height:58px;}
     <button class="save-btn" style="margin-top:14px" onclick="addSlot()">💾 إضافة النشاط</button>
   </div>
 </div>
+
 <script>
 const firebaseConfig={apiKey:"AIzaSyAROFo8m5M2ETnVFWh86GkaMxThDV9S8fY",authDomain:"family-dashboard-e979a.firebaseapp.com",databaseURL:"https://family-dashboard-e979a-default-rtdb.firebaseio.com",projectId:"family-dashboard-e979a",storageBucket:"family-dashboard-e979a.firebasestorage.app",messagingSenderId:"945587305724",appId:"1:945587305724:web:647608b0676e3aa6a92b79"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
+
 const DAYS_AR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const DAYS_SHORT=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const COLORS=["#5B247A","#1BCEDF","#8b5cf6","#ea580c","#059669","#ec4899","#0891b2","#d97706"];
 const PC={high:{label:"عالية",color:"#ef4444",bg:"#fee2e2"},medium:{label:"متوسطة",color:"#d97706",bg:"#fef3c7"},low:{label:"منخفضة",color:"#0891b2",bg:"#e0f2fe"}};
 const SI={"رياضيات":"🔢","عربي":"📖","إنجليزي":"🔤","علوم":"🔬","دين":"🌙","رياضة":"⚽","فن":"🎨","موسيقى":"🎵","تاريخ":"📜","جغرافيا":"🌍","نوم":"😴","طعام":"🍽️","حرة":"🎮","قرآن":"📚","تلفزيون":"📺","مذاكرة":"✏️"};
-let clientId=null,tasks={},children={},schedules={},stars={};
+
+let clientId=null,tasks={},children={},schedules={},stars={},members={};
 let activeChild=null,selPriority="medium",selColor=COLORS[0],selDay=new Date().getDay();
+let selMemberColor=COLORS[0],selAssign=null,taskFilter="all";
 let notifTimers={},_id=Date.now();
+
 function uid(){return "k"+(++_id);}
 function setSync(s,t){document.getElementById("sync-bar").className=s;document.getElementById("sync-txt").textContent=t;}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -436,11 +476,20 @@ function toast(msg){const el=document.getElementById("toast");el.textContent=msg
 function cleanId(s){return s.trim().toLowerCase().replace(/[^a-z0-9أ-ي_\-]/g,"_");}
 function $(id){return document.getElementById(id);}
 function hashPass(p){let h=0;for(let i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0;}return h.toString(36);}
+
 const dn=new Date();
-$("today-date").textContent=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"][dn.getDay()]+" — "+dn.toLocaleDateString("ar-SA");
-(function init(){const saved=localStorage.getItem("fam_session");if(saved){startApp(saved);return;}showLogin();})();
+$("today-date").textContent=DAYS_AR[dn.getDay()]+" — "+dn.toLocaleDateString("ar-SA");
+
+// ── INIT ──
+(function init(){
+  const saved=localStorage.getItem("fam_session");
+  if(saved){startApp(saved);return;}
+  showLogin();
+})();
+
 function showLogin(){$("login-screen").classList.remove("hidden");$("register-screen").classList.add("hidden");}
 function showRegister(){$("register-screen").classList.remove("hidden");$("login-screen").classList.add("hidden");}
+
 function doRegister(){
   const name=($("reg-name").value||"").trim().toLowerCase();
   const pass=($("reg-pass").value||"").trim();
@@ -451,18 +500,20 @@ function doRegister(){
   if(pass!==pass2){errEl.textContent="كلمتا السر غير متطابقتين";errEl.classList.add("show");return;}
   const uid2=cleanId(name);
   db.ref("users/"+uid2).once("value",snap=>{
-    if(snap.exists()){errEl.textContent="اسم المستخدم مأخوذ، جرّب اسماً آخر";errEl.classList.add("show");return;}
+    if(snap.exists()){errEl.textContent="اسم المستخدم مأخوذ";errEl.classList.add("show");return;}
     db.ref("users/"+uid2).set({name:uid2,pass:hashPass(pass),created:Date.now()});
     localStorage.setItem("fam_session",uid2);
     $("reg-name").value="";$("reg-pass").value="";$("reg-pass2").value="";
     startApp(uid2);toast("🎉 مرحباً! تم إنشاء حسابك بنجاح");
   });
 }
+
 function doLogin(){
   const name=($("login-name").value||"").trim().toLowerCase();
   const pass=($("login-pass").value||"").trim();
   const errEl=$("login-error");errEl.classList.remove("show");
-  if(!name){$("login-name").focus();return;}if(!pass){$("login-pass").focus();return;}
+  if(!name){$("login-name").focus();return;}
+  if(!pass){$("login-pass").focus();return;}
   const uid2=cleanId(name);
   db.ref("users/"+uid2).once("value",snap=>{
     if(!snap.exists()){errEl.textContent="اسم المستخدم غير موجود";errEl.classList.add("show");return;}
@@ -473,7 +524,9 @@ function doLogin(){
     startApp(uid2);toast("🎉 مرحباً بعودتك!");
   });
 }
+
 function doLogout(){localStorage.removeItem("fam_session");db.ref("clients/"+clientId).off();location.href=location.pathname;}
+
 function startApp(id){
   clientId=id;
   $("login-screen").classList.add("hidden");$("register-screen").classList.add("hidden");$("app").classList.remove("hidden");
@@ -486,12 +539,31 @@ function startApp(id){
   db.ref("clients/"+clientId+"/children").on("value",snap=>{children=snap.val()||{};if(!children[activeChild]){const k=Object.keys(children);activeChild=k.length?k[0]:null;}renderAll();});
   db.ref("clients/"+clientId+"/schedules").on("value",snap=>{schedules=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/stars").on("value",snap=>{stars=snap.val()||{};renderAll();});
+  db.ref("clients/"+clientId+"/members").on("value",snap=>{members=snap.val()||{};renderAll();});
 }
-function showPage(p){["overview","tasks","schedule"].forEach(id=>{$("page-"+id).classList.toggle("hidden",id!==p);$("nav-"+id).classList.toggle("active",id===p);});renderAll();}
-function openModal(id){$(id).classList.remove("hidden");}
+
+function showPage(p){
+  ["overview","tasks","members","schedule"].forEach(id=>{
+    const pe=$("page-"+id);if(pe)pe.classList.toggle("hidden",id!==p);
+    const ne=$("nav-"+id);if(ne)ne.classList.toggle("active",id===p);
+  });
+  renderAll();
+}
+
+function openModal(id){
+  $(id).classList.remove("hidden");
+  if(id==="task-modal"){buildTaskAssignBtns();}
+  if(id==="member-modal"){buildMemberColorPicker();}
+}
 function closeModal(id){$(id).classList.add("hidden");}
 document.addEventListener("click",e=>{if(e.target.classList.contains("overlay"))closeModal(e.target.id);});
-function renderAll(){renderStats();renderDonut();renderBars();renderChildrenStars();renderTodaySchedule();renderAllTasks();renderSchedulePage();}
+
+function renderAll(){
+  renderStats();renderDonut();renderBars();renderChildrenStars();
+  renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
+}
+
+// ── STATS ──
 function renderStats(){
   const l=Object.values(tasks);
   $("stat-pending").textContent=l.filter(t=>!t.done).length;
@@ -500,6 +572,7 @@ function renderStats(){
   let tot=0;Object.values(stars).forEach(cs=>Object.values(cs||{}).forEach(s=>{tot+=parseInt(s.stars||0);}));
   $("stat-stars").textContent=tot;
 }
+
 function renderDonut(){
   const l=Object.values(tasks),total=l.length,done=l.filter(t=>t.done).length,pct=total?Math.round(done/total*100):0;
   $("donut-ring").style.strokeDashoffset=276-(276*pct/100);
@@ -508,12 +581,15 @@ function renderDonut(){
   $("leg-high").textContent=l.filter(t=>t.priority==="high").length;
   $("leg-medium").textContent=l.filter(t=>t.priority==="medium").length;
 }
+
 function renderBars(){
   const l=Object.values(tasks),total=l.length||1;
   const data=[{label:"عالية",color:"#ef4444",count:l.filter(t=>t.priority==="high").length},{label:"متوسطة",color:"#d97706",count:l.filter(t=>t.priority==="medium").length},{label:"منخفضة",color:"#0891b2",count:l.filter(t=>t.priority==="low").length},{label:"مكتملة",color:"#059669",count:l.filter(t=>t.done).length}];
   ["priority-bars","priority-bars-2"].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML="";data.forEach(d=>{const pct=Math.round(d.count/total*100);const row=document.createElement("div");row.className="bar-row";row.innerHTML=`<div class="bar-label">${d.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.color}"></div></div><div class="bar-val" style="color:${d.color}">${d.count}</div>`;el.appendChild(row);});});
 }
+
 function getChildStars(cid){let t=0;Object.values(stars[cid]||{}).forEach(s=>{t+=parseInt(s.stars||0);});return t;}
+
 function renderChildrenStars(){
   const el=$("children-stars-overview");if(!el)return;el.innerHTML="";
   const cl=Object.values(children);
@@ -522,10 +598,11 @@ function renderChildrenStars(){
     const tot=getChildStars(c.id);
     const row=document.createElement("div");row.className="child-star-row";
     const starsStr=tot>0?("⭐".repeat(Math.min(tot,10))+(tot>10?` +${tot-10}`:"")):`<span style="color:var(--dim);font-size:12px">لا توجد نجوم بعد</span>`;
-    row.innerHTML=`<div class="child-star-name"><div class="child-star-dot" style="background:${c.color};width:10px;height:10px;border-radius:50%"></div>${esc(c.name)}${c.age?` (${c.age})`:""}</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px">${starsStr}</span>${tot>0?`<span class="star-badge">${tot} ⭐</span>`:""}</div>`;
+    row.innerHTML=`<div class="child-star-name"><div style="background:${c.color};width:10px;height:10px;border-radius:50%"></div>${esc(c.name)}${c.age?` (${c.age})`:""}</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px">${starsStr}</span>${tot>0?`<span class="star-badge">${tot} ⭐</span>`:""}</div>`;
     el.appendChild(row);
   });
 }
+
 function renderTodaySchedule(){
   const el=$("today-schedule-list");if(!el)return;el.innerHTML="";
   const now=new Date(),todayDay=now.getDay();
@@ -540,20 +617,141 @@ function renderTodaySchedule(){
     const d=document.createElement("div");d.className="activity-item";
     if(item.type==="task"){
       const t=item.data,p=PC[t.priority]||PC.medium;
-      d.innerHTML=`<div class="activity-dot" style="background:${p.bg};font-size:16px;border:2px solid ${p.color}33">${t.done?"✅":"📋"}</div><div style="flex:1"><div class="activity-title" style="${t.done?"text-decoration:line-through;opacity:.55":""}">${esc(t.title)}</div><div class="activity-meta">${t.time?"⏰ "+t.time+" &nbsp;":""}<span style="background:${p.bg};color:${p.color};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">${p.label}</span></div></div><button onclick="toggleTask('${t.id}')" style="background:${p.bg};border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;color:${p.color};font-weight:700;white-space:nowrap">${t.done?"↩":"✔ إنجاز"}</button>`;
+      d.innerHTML=`<div class="activity-dot" style="background:${p.bg};font-size:16px">${t.done?"✅":"📋"}</div><div style="flex:1"><div class="activity-title" style="${t.done?"text-decoration:line-through;opacity:.55":""}">${esc(t.title)}</div><div class="activity-meta">${t.time?"⏰ "+t.time+" ":""}<span style="background:${p.bg};color:${p.color};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">${p.label}</span></div></div><button onclick="toggleTask('${t.id}')" style="background:${p.bg};border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;color:${p.color};font-weight:700;white-space:nowrap">${t.done?"↩":"✔ إنجاز"}</button>`;
     } else {
       const s=item.data;
-      d.innerHTML=`<div class="activity-dot" style="background:${s.childColor}22;font-size:18px">${SI[s.subject]||"📌"}</div><div style="flex:1"><div class="activity-title">${esc(s.subject)}</div><div class="activity-meta">⏰ ${s.from}–${s.to} &nbsp;·&nbsp; <span style="background:${s.childColor}22;color:${s.childColor};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">👶 ${esc(s.childName)}</span></div></div>`;
+      d.innerHTML=`<div class="activity-dot" style="background:${s.childColor}22;font-size:18px">${SI[s.subject]||"📌"}</div><div style="flex:1"><div class="activity-title">${esc(s.subject)}</div><div class="activity-meta">⏰ ${s.from}–${s.to} · <span style="background:${s.childColor}22;color:${s.childColor};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">👶 ${esc(s.childName)}</span></div></div>`;
     }
     el.appendChild(d);
   });
 }
-function renderAllTasks(){
-  const el=$("all-tasks-list");if(!el)return;el.innerHTML="";
-  const l=Object.values(tasks);
-  if(!l.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><div>لا توجد مهام — اضغط + لإضافة مهمة</div></div>';return;}
-  l.forEach(t=>{const p=PC[t.priority]||PC.medium;const d=document.createElement("div");d.className="task-row"+(t.done?" done-row":"");d.style.borderRight="3px solid "+p.color;d.innerHTML=`<button class="chk" onclick="toggleTask('${t.id}')">${t.done?"✅":"⬜"}</button><div style="flex:1"><div class="task-text${t.done?" done":""}">${esc(t.title)}</div><div class="task-info">${t.date?"📅 "+t.date:""}${t.time?" ⏰ "+t.time:""}</div></div><span class="p-pill" style="background:${p.bg};color:${p.color}">${p.label}</span><button class="del-x" onclick="deleteTask('${t.id}')">✕</button>`;el.appendChild(d);});
+
+// ── TASKS ──
+function setTaskFilter(filter){
+  taskFilter=filter;
+  document.querySelectorAll(".task-filter-btn").forEach(b=>b.classList.toggle("active",b.dataset.filter===filter));
+  renderAllTasks();
 }
+
+function buildTaskFilterRow(){
+  const row=$("task-filter-row");if(!row)return;
+  row.innerHTML=`<button class="task-filter-btn${taskFilter==="all"?" active":""}" data-filter="all" onclick="setTaskFilter('all')">الكل</button>`;
+  Object.values(members).forEach(m=>{
+    const b=document.createElement("button");
+    b.className="task-filter-btn"+(taskFilter===m.id?" active":"");
+    b.dataset.filter=m.id;
+    b.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span> ${esc(m.name)}`;
+    b.onclick=()=>setTaskFilter(m.id);
+    row.appendChild(b);
+  });
+}
+
+function buildTaskAssignBtns(){
+  const row=$("task-assign-btns");if(!row)return;row.innerHTML="";
+  const none=document.createElement("button");
+  none.style.cssText=`padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;border:1.5px solid ${selAssign===null?"var(--grad-start)":"var(--border2)"};background:${selAssign===null?"linear-gradient(135deg,#f5eeff,#edfcff)":"var(--card2)"};color:${selAssign===null?"var(--grad-start)":"var(--muted)"}`;
+  none.textContent="بدون تعيين";
+  none.onclick=()=>{selAssign=null;buildTaskAssignBtns();};
+  row.appendChild(none);
+  Object.values(members).forEach(m=>{
+    const b=document.createElement("button");
+    const active=selAssign===m.id;
+    b.style.cssText=`padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;border:1.5px solid ${active?m.color:"var(--border2)"};background:${active?m.color+"22":"var(--card2)"};color:${active?m.color:"var(--muted)"};display:flex;align-items:center;gap:5px`;
+    b.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${esc(m.name)}`;
+    b.onclick=()=>{selAssign=m.id;buildTaskAssignBtns();};
+    row.appendChild(b);
+  });
+}
+
+function renderAllTasks(){
+  buildTaskFilterRow();
+  const el=$("all-tasks-list");if(!el)return;el.innerHTML="";
+  let l=Object.values(tasks);
+  if(taskFilter!=="all") l=l.filter(t=>t.assignedTo===taskFilter);
+  if(!l.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><div>لا توجد مهام</div></div>';return;}
+  l.forEach(t=>{
+    const p=PC[t.priority]||PC.medium;
+    const mem=t.assignedTo?members[t.assignedTo]:null;
+    const d=document.createElement("div");d.className="task-row"+(t.done?" done-row":"");d.style.borderRight="3px solid "+p.color;
+    d.innerHTML=`<button class="chk" onclick="toggleTask('${t.id}')">${t.done?"✅":"⬜"}</button>
+    <div style="flex:1"><div class="task-text${t.done?" done":""}">${esc(t.title)}</div>
+    <div class="task-info">${t.date?"📅 "+t.date:""}${t.time?" ⏰ "+t.time:""}${mem?`<span style="background:${mem.color}22;color:${mem.color};border-radius:8px;padding:1px 8px;font-size:10px;font-weight:700">👤 ${esc(mem.name)}</span>`:""}</div></div>
+    <span class="p-pill" style="background:${p.bg};color:${p.color}">${p.label}</span>
+    <button class="del-x" onclick="deleteTask('${t.id}')">✕</button>`;
+    el.appendChild(d);
+  });
+}
+
+function addTask(){
+  const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}
+  const id=uid();setSync("syncing","جاري الحفظ...");
+  const data={id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false};
+  if(selAssign) data.assignedTo=selAssign;
+  db.ref("clients/"+clientId+"/tasks/"+id).set(data);
+  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");
+  selPriority="medium";selAssign=null;
+  buildPriorityBtns();
+  closeModal("task-modal");toast("✅ تمت إضافة المهمة!");
+}
+function toggleTask(id){if(!tasks[id])return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).update({done:!tasks[id].done});}
+function deleteTask(id){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).remove();}
+
+// ── MEMBERS ──
+function buildMemberColorPicker(){
+  const row=$("member-color-picker");if(!row)return;row.innerHTML="";
+  COLORS.forEach(c=>{
+    const b=document.createElement("button");b.className="color-dot"+(c===selMemberColor?" selected":"");b.style.background=c;
+    b.onclick=()=>{selMemberColor=c;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===c));};
+    row.appendChild(b);
+  });
+}
+
+function addMember(){
+  const name=$("mem-name").value.trim();if(!name){$("mem-name").focus();return;}
+  const id=uid();setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/members/"+id).set({id,name,color:selMemberColor});
+  $("mem-name").value="";
+  closeModal("member-modal");toast("👤 تمت إضافة "+name+"!");
+}
+
+function deleteMember(id){
+  if(!confirm("حذف هذا الشخص؟"))return;
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/members/"+id).remove();
+}
+
+function renderMembersPage(){
+  const el=$("members-list");if(!el)return;el.innerHTML="";
+  const list=Object.values(members);
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div>لا يوجد أشخاص — اضغط + لإضافة شخص</div></div>';return;}
+  list.forEach(m=>{
+    const all=Object.values(tasks).filter(t=>t.assignedTo===m.id);
+    const done=all.filter(t=>t.done).length;
+    const total=all.length;
+    const pct=total?Math.round(done/total*100):0;
+    const row=document.createElement("div");row.className="member-row";
+    row.innerHTML=`
+      <div class="member-avatar" style="background:${m.color}">${esc(m.name).charAt(0)}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">${esc(m.name)}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="flex:1;height:7px;background:#f0eaff;border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${m.color};border-radius:4px;transition:width .6s ease"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);white-space:nowrap">${done}/${total} مهمة · ${pct}%</span>
+        </div>
+      </div>
+      <button onclick="deleteMember('${m.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>`;
+    el.appendChild(row);
+  });
+}
+
+// ── CHILDREN ──
+function buildColorPicker(){const row=$("color-picker");if(!row)return;row.innerHTML="";COLORS.forEach(c=>{const b=document.createElement("button");b.className="color-dot"+(c===selColor?" selected":"");b.style.background=c;b.onclick=()=>{selColor=c;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===c));};row.appendChild(b);});}
+function addChild(){const name=$("cf-name").value.trim();if(!name){$("cf-name").focus();return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).set({id,name,age:$("cf-age").value,color:selColor});activeChild=id;$("cf-name").value="";$("cf-age").value="";selColor=COLORS[Object.keys(children).length%COLORS.length];buildColorPicker();closeModal("child-modal");toast("👶 تمت إضافة "+name+"!");}
+function deleteChild(id){if(!confirm("حذف هذا الطفل وجدوله ونجومه؟"))return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).remove();db.ref("clients/"+clientId+"/schedules/"+id).remove();db.ref("clients/"+clientId+"/stars/"+id).remove();}
+
+// ── SCHEDULE ──
 function renderSchedulePage(){
   if(Object.keys(children).length===0){$("no-children").classList.remove("hidden");$("schedule-content").classList.add("hidden");return;}
   $("no-children").classList.add("hidden");$("schedule-content").classList.remove("hidden");
@@ -585,194 +783,18 @@ function renderSchedulePage(){
     grid.appendChild(col);
   });
 }
+
 function setStar(cid,slotId,count){const cur=parseInt(((stars[cid]||{})[slotId]||{}).stars||0);const nv=cur===count?0:count;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/stars/"+cid+"/"+slotId).set({stars:nv});if(nv>0)toast("⭐".repeat(nv)+" تم منح "+nv+" نجمة!");}
+
+// ── FORMS ──
 function buildPriorityBtns(){const row=$("priority-btns");if(!row)return;row.innerHTML="";Object.entries(PC).forEach(([k,v])=>{const b=document.createElement("button");b.className="p-btn";b.textContent=v.label;b.dataset.key=k;applyPBtn(b,k,k===selPriority);b.onclick=()=>{selPriority=k;row.querySelectorAll(".p-btn").forEach(x=>applyPBtn(x,x.dataset.key,x.dataset.key===k));};row.appendChild(b);});}
 function applyPBtn(b,k,a){const v=PC[k];b.style.background=a?v.bg:"#f8f6ff";b.style.border="2px solid "+(a?v.color:"var(--border2)");b.style.color=a?v.color:"var(--muted)";}
-function buildColorPicker(){const row=$("color-picker");if(!row)return;row.innerHTML="";COLORS.forEach(c=>{const b=document.createElement("button");b.className="color-dot"+(c===selColor?" selected":"");b.style.background=c;b.onclick=()=>{selColor=c;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===c));};row.appendChild(b);});}
 function buildDayPicker(){const dp=$("day-picker");if(!dp)return;dp.innerHTML="";DAYS_SHORT.forEach((d,i)=>{const b=document.createElement("button");b.className="day-pill";b.textContent=d;b.dataset.day=i;applyDP(b,i);b.onclick=()=>{selDay=i;dp.querySelectorAll(".day-pill").forEach(x=>applyDP(x,parseInt(x.dataset.day)));};dp.appendChild(b);});}
 function applyDP(b,i){const a=i===selDay;b.style.background=a?"linear-gradient(135deg,#f5eeff,#edfcff)":"var(--card2)";b.style.border="1.5px solid "+(a?"#5B247A":"var(--border2)");b.style.color=a?"#5B247A":"var(--muted)";}
 function buildQuickSubj(){const qs=$("quick-subj");if(!qs)return;qs.innerHTML="";Object.entries(SI).forEach(([s,icon])=>{const b=document.createElement("button");b.className="subj-btn";b.textContent=icon+" "+s;b.onclick=()=>{$("sf-subject").value=s;};qs.appendChild(b);});}
 function scheduleNotifs(){Object.values(notifTimers).forEach(clearTimeout);notifTimers={};Object.values(tasks).forEach(t=>{if(t.done||!t.date||!t.time)return;const diff=new Date(t.date+"T"+t.time).getTime()-Date.now()-300000;if(diff>0)notifTimers[t.id]=setTimeout(()=>{if(typeof Notification!=="undefined"&&Notification.permission==="granted")new Notification("⏰ "+t.title,{body:"بعد 5 دقائق!"});toast("⏰ "+t.title+" — بعد 5 دقائق!");},diff);});}
-function addTask(){const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).set({id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false});["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");selPriority="medium";buildPriorityBtns();closeModal("task-modal");toast("✅ تمت إضافة المهمة!");}
-function toggleTask(id){if(!tasks[id])return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).update({done:!tasks[id].done});}
-function deleteTask(id){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).remove();}
-function addChild(){const name=$("cf-name").value.trim();if(!name){$("cf-name").focus();return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).set({id,name,age:$("cf-age").value,color:selColor});activeChild=id;$("cf-name").value="";$("cf-age").value="";selColor=COLORS[Object.keys(children).length%COLORS.length];buildColorPicker();closeModal("child-modal");toast("👶 تمت إضافة "+name+"!");}
-function deleteChild(id){if(!confirm("حذف هذا الطفل وجدوله ونجومه؟"))return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).remove();db.ref("clients/"+clientId+"/schedules/"+id).remove();db.ref("clients/"+clientId+"/stars/"+id).remove();}
 function addSlot(){if(!activeChild)return;const from=$("sf-from").value,to=$("sf-to").value,subject=$("sf-subject").value.trim();if(!from||!to||!subject){toast("⚠️ يرجى تعبئة الوقت والنشاط");return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+activeChild+"/"+id).set({id,day:selDay,from,to,subject});$("sf-from").value="";$("sf-to").value="";$("sf-subject").value="";closeModal("slot-modal");toast("📅 تمت إضافة النشاط!");}
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
-
-// ── MEMBERS ──
-let members={}, selMemberColor="#5B247A", taskFilter="all", selAssign=null;
-
-// add member firebase listener in startApp - we patch renderAll
-const _origRenderAll = null;
-
-function initMembersListener(){
-  db.ref("clients/"+clientId+"/members").on("value",snap=>{
-    members=snap.val()||{};
-    renderAll();
-  });
-}
-
-function addMember(){
-  const name=$("mem-name").value.trim();if(!name){$("mem-name").focus();return;}
-  const id=uid();setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/members/"+id).set({id,name,color:selMemberColor});
-  $("mem-name").value="";
-  closeModal("member-modal");toast("👤 تمت إضافة "+name+"!");
-}
-function deleteMember(id){
-  if(!confirm("حذف هذا الشخص؟"))return;
-  setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/members/"+id).remove();
-}
-
-function buildMemberColorPicker(){
-  const row=$("member-color-picker");if(!row)return;row.innerHTML="";
-  COLORS.forEach(c=>{
-    const b=document.createElement("button");
-    b.className="color-dot"+(c===selMemberColor?" selected":"");
-    b.style.background=c;
-    b.onclick=()=>{selMemberColor=c;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===c));};
-    row.appendChild(b);
-  });
-}
-
-function buildTaskAssignBtns(){
-  const row=$("task-assign-btns");if(!row)return;row.innerHTML="";
-  // none option
-  const none=document.createElement("button");
-  none.style.cssText=`padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;border:1.5px solid ${selAssign===null?"var(--grad-start)":"var(--border2)"};background:${selAssign===null?"linear-gradient(135deg,#f5eeff,#edfcff)":"var(--card2)"};color:${selAssign===null?"var(--grad-start)":"var(--muted)"}`;
-  none.textContent="بدون";
-  none.onclick=()=>{selAssign=null;buildTaskAssignBtns();};
-  row.appendChild(none);
-  Object.values(members).forEach(m=>{
-    const b=document.createElement("button");
-    const active=selAssign===m.id;
-    b.style.cssText=`padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;border:1.5px solid ${active?m.color:"var(--border2)"};background:${active?m.color+"22":"var(--card2)"};color:${active?m.color:"var(--muted)"};display:flex;align-items:center;gap:5px`;
-    b.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${esc(m.name)}`;
-    b.onclick=()=>{selAssign=m.id;buildTaskAssignBtns();};
-    row.appendChild(b);
-  });
-}
-
-function setTaskFilter(filter){
-  taskFilter=filter;
-  document.querySelectorAll(".task-filter-btn").forEach(b=>b.classList.toggle("active",b.dataset.filter===filter));
-  renderAllTasks();
-}
-
-function buildTaskFilterRow(){
-  const row=$("task-filter-row");if(!row)return;
-  row.innerHTML='<button class="task-filter-btn'+(taskFilter==="all"?" active":"") +'" data-filter="all" onclick="setTaskFilter('all')">الكل</button>';
-  Object.values(members).forEach(m=>{
-    const b=document.createElement("button");
-    b.className="task-filter-btn"+(taskFilter===m.id?" active":"");
-    b.dataset.filter=m.id;
-    b.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${esc(m.name)}`;
-    b.onclick=()=>setTaskFilter(m.id);
-    row.appendChild(b);
-  });
-}
-
-function renderMembersPage(){
-  const el=$("members-list");if(!el)return;el.innerHTML="";
-  const list=Object.values(members);
-  if(!list.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div>لا يوجد أشخاص — اضغط + لإضافة شخص</div></div>';
-    return;
-  }
-  list.forEach(m=>{
-    const taskCount=Object.values(tasks).filter(t=>t.assignedTo===m.id).length;
-    const doneCount=Object.values(tasks).filter(t=>t.assignedTo===m.id&&t.done).length;
-    const pct=taskCount?Math.round(doneCount/taskCount*100):0;
-    const row=document.createElement("div");row.className="member-row";
-    row.innerHTML=`
-      <div class="member-avatar" style="background:${m.color}">${esc(m.name).charAt(0)}</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">${esc(m.name)}</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="flex:1;height:7px;background:#f0eaff;border-radius:4px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:${m.color};border-radius:4px;transition:width .6s ease"></div>
-          </div>
-          <span style="font-size:11px;color:var(--muted);white-space:nowrap">${doneCount}/${taskCount} مهمة · ${pct}%</span>
-        </div>
-      </div>
-      <button onclick="deleteMember('${m.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>`;
-    el.appendChild(row);
-  });
-}
-
-// Override addTask to include assignedTo
-const _origAddTask = addTask;
-addTask = function(){
-  const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}
-  const id=uid();setSync("syncing","جاري الحفظ...");
-  const taskData={id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false};
-  if(selAssign) taskData.assignedTo=selAssign;
-  db.ref("clients/"+clientId+"/tasks/"+id).set(taskData);
-  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");
-  selPriority="medium";selAssign=null;buildPriorityBtns();buildTaskAssignBtns();
-  closeModal("task-modal");toast("✅ تمت إضافة المهمة!");
-};
-
-// Override renderAllTasks to show assigned person + filter
-const _origRenderAllTasks = renderAllTasks;
-renderAllTasks = function(){
-  buildTaskFilterRow();
-  const el=$("all-tasks-list");if(!el)return;el.innerHTML="";
-  let l=Object.values(tasks);
-  if(taskFilter!=="all") l=l.filter(t=>t.assignedTo===taskFilter);
-  if(!l.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><div>لا توجد مهام</div></div>';return;}
-  l.forEach(t=>{
-    const p=PC[t.priority]||PC.medium;
-    const m=t.assignedTo?members[t.assignedTo]:null;
-    const d=document.createElement("div");d.className="task-row"+(t.done?" done-row":"");d.style.borderRight="3px solid "+p.color;
-    d.innerHTML=`<button class="chk" onclick="toggleTask('${t.id}')">${t.done?"✅":"⬜"}</button>
-    <div style="flex:1">
-      <div class="task-text${t.done?" done":""}">${esc(t.title)}</div>
-      <div class="task-info" style="display:flex;align-items:center;gap:8px;margin-top:3px">
-        ${t.date?"📅 "+t.date:""}${t.time?" ⏰ "+t.time:""}
-        ${m?`<span style="background:${m.color}22;color:${m.color};border-radius:8px;padding:1px 8px;font-size:10px;font-weight:700">👤 ${esc(m.name)}</span>`:""}
-      </div>
-    </div>
-    <span class="p-pill" style="background:${p.bg};color:${p.color}">${p.label}</span>
-    <button class="del-x" onclick="deleteTask('${t.id}')">✕</button>`;
-    el.appendChild(d);
-  });
-};
-
-// Override showPage to handle members
-const _origShowPage = showPage;
-showPage = function(p){
-  ["overview","tasks","schedule","members"].forEach(id=>{
-    const pel=$("page-"+id);if(pel)pel.classList.toggle("hidden",id!==p);
-    const nel=$("nav-"+id);if(nel)nel.classList.toggle("active",id===p);
-  });
-  if(p==="tasks"){buildTaskAssignBtns();}
-  renderAll();
-};
-
-// Override renderAll to include members
-const _origRA = renderAll;
-renderAll = function(){
-  renderStats();renderDonut();renderBars();renderChildrenStars();renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
-};
-
-// Override openModal to rebuild assign btns when task modal opens
-const _origOpenModal = openModal;
-openModal = function(id){
-  document.getElementById(id).classList.remove("hidden");
-  if(id==="task-modal"){buildTaskAssignBtns();}
-  if(id==="member-modal"){buildMemberColorPicker();}
-};
-
-// Init members listener after startApp
-const _origStartApp = startApp;
-startApp = function(id){
-  _origStartApp(id);
-  initMembersListener();
-};
 </script>
 </body>
 </html>
