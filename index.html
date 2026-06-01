@@ -210,6 +210,9 @@ textarea{resize:none;height:58px;}
 /* TOAST */
 #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:12px 22px;font-size:13px;color:var(--text);box-shadow:0 16px 50px #5B247A28;opacity:0;transition:all .35s;z-index:999;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.code-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card2);border-radius:11px;border:1px solid var(--border);font-size:13px;font-family:monospace;}
+.code-item.used{opacity:.5;background:#f0f0f0;}
+.code-badge{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700;}
 .empty-state{text-align:center;color:var(--dim);padding:34px 0;font-size:13px;}
 .empty-icon{font-size:38px;margin-bottom:10px;}
 .hidden{display:none!important;}
@@ -242,6 +245,7 @@ textarea{resize:none;height:58px;}
     <div class="auth-title">إنشاء حساب</div>
     <div class="auth-sub">أنشئ حسابك الخاص للوحة العائلة</div>
     <div class="auth-error" id="reg-error"></div>
+    <input class="auth-input" id="reg-invite" placeholder="كود الدعوة *" maxlength="20" onkeydown="if(event.key==='Enter')doRegister()"/>
     <input class="auth-input" id="reg-name" placeholder="اسم المستخدم" maxlength="30" onkeydown="if(event.key==='Enter')doRegister()"/>
     <input class="auth-input" id="reg-pass" type="password" placeholder="كلمة السر" maxlength="40" onkeydown="if(event.key==='Enter')doRegister()"/>
     <input class="auth-input" id="reg-pass2" type="password" placeholder="تأكيد كلمة السر" maxlength="40" onkeydown="if(event.key==='Enter')doRegister()"/>
@@ -277,6 +281,7 @@ textarea{resize:none;height:58px;}
       <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">📊</span><span>نظرة عامة</span></div>
       <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks"><span class="nav-icon">✅</span><span>المهام</span></div>
       <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon">👥</span><span>الأشخاص</span></div>
+      <div class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">🛡️</span><span>الإدارة</span></div>
       <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">📅</span><span>الجداول</span></div>
     </nav>
     <div class="sidebar-bottom">
@@ -396,6 +401,37 @@ textarea{resize:none;height:58px;}
       </div>
     </div>
 
+    <!-- ADMIN PAGE -->
+    <div id="page-admin" class="hidden">
+      <div class="page-header">
+        <div><div class="page-title">لوحة الإدارة 🛡️</div><div class="page-sub">إدارة كودات الدعوة والمستخدمين</div></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-grad" onclick="generateCodes(10)">＋ توليد 10 كودات</button>
+          <button class="btn-grad" onclick="generateCodes(50)" style="background:linear-gradient(135deg,#059669,#34d399)">＋ 50 كود</button>
+        </div>
+      </div>
+      <div class="content-grid" style="padding-bottom:28px">
+        <div class="panel fadeUp">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot" style="background:var(--green)"></div>كودات متاحة</div>
+            <span id="codes-available-count" style="font-size:12px;color:var(--muted)">0 كود</span>
+          </div>
+          <div class="panel-body">
+            <div id="codes-available-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
+          </div>
+        </div>
+        <div class="panel fadeUp">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot" style="background:var(--muted)"></div>كودات مستخدمة</div>
+            <span id="codes-used-count" style="font-size:12px;color:var(--muted)">0 كود</span>
+          </div>
+          <div class="panel-body">
+            <div id="codes-used-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -490,21 +526,35 @@ $("today-date").textContent=DAYS_AR[dn.getDay()]+" — "+dn.toLocaleDateString("
 function showLogin(){$("login-screen").classList.remove("hidden");$("register-screen").classList.add("hidden");}
 function showRegister(){$("register-screen").classList.remove("hidden");$("login-screen").classList.add("hidden");}
 
+// ── ADMIN CREDENTIALS ──
+const ADMIN_USER = "mahmood";
+const ADMIN_PASS_HASH = hashPass("!$M3hmood#");
+
 function doRegister(){
+  const invite=($("reg-invite").value||"").trim().toUpperCase();
   const name=($("reg-name").value||"").trim().toLowerCase();
   const pass=($("reg-pass").value||"").trim();
   const pass2=($("reg-pass2").value||"").trim();
   const errEl=$("reg-error");errEl.classList.remove("show");
+  if(!invite){errEl.textContent="يرجى إدخال كود الدعوة";errEl.classList.add("show");return;}
   if(!name||name.length<3){errEl.textContent="اسم المستخدم يجب أن يكون 3 أحرف على الأقل";errEl.classList.add("show");return;}
   if(!pass||pass.length<4){errEl.textContent="كلمة السر يجب أن تكون 4 أحرف على الأقل";errEl.classList.add("show");return;}
   if(pass!==pass2){errEl.textContent="كلمتا السر غير متطابقتين";errEl.classList.add("show");return;}
-  const uid2=cleanId(name);
-  db.ref("users/"+uid2).once("value",snap=>{
-    if(snap.exists()){errEl.textContent="اسم المستخدم مأخوذ";errEl.classList.add("show");return;}
-    db.ref("users/"+uid2).set({name:uid2,pass:hashPass(pass),created:Date.now()});
-    localStorage.setItem("fam_session",uid2);
-    $("reg-name").value="";$("reg-pass").value="";$("reg-pass2").value="";
-    startApp(uid2);toast("🎉 مرحباً! تم إنشاء حسابك بنجاح");
+  // تحقق من الكود
+  db.ref("inviteCodes/"+invite).once("value", snap=>{
+    if(!snap.exists()){errEl.textContent="كود الدعوة غير صحيح";errEl.classList.add("show");return;}
+    const codeData=snap.val();
+    if(codeData.used){errEl.textContent="هذا الكود تم استخدامه مسبقاً";errEl.classList.add("show");return;}
+    const uid2=cleanId(name);
+    db.ref("users/"+uid2).once("value",snap2=>{
+      if(snap2.exists()){errEl.textContent="اسم المستخدم مأخوذ";errEl.classList.add("show");return;}
+      // سجّل المستخدم واستهلك الكود
+      db.ref("users/"+uid2).set({name:uid2,pass:hashPass(pass),created:Date.now(),inviteCode:invite});
+      db.ref("inviteCodes/"+invite).update({used:true,usedBy:uid2,usedAt:Date.now()});
+      localStorage.setItem("fam_session",uid2);
+      $("reg-name").value="";$("reg-pass").value="";$("reg-pass2").value="";$("reg-invite").value="";
+      startApp(uid2);toast("🎉 مرحباً! تم إنشاء حسابك بنجاح");
+    });
   });
 }
 
@@ -531,6 +581,9 @@ function startApp(id){
   clientId=id;
   $("login-screen").classList.add("hidden");$("register-screen").classList.add("hidden");$("app").classList.remove("hidden");
   $("sidebar-name").textContent=id;document.title="لوحة "+id+" 🏠";
+  // إظهار قسم الإدارة للمدير فقط
+  const adminNav=$("nav-admin");
+  if(adminNav) adminNav.style.display=id===ADMIN_USER?"flex":"none";
   buildPriorityBtns();buildColorPicker();buildDayPicker();buildQuickSubj();
   if(typeof Notification!=="undefined"&&Notification.permission==="default")Notification.requestPermission();
   window.addEventListener("offline",()=>setSync("offline","غير متصل"));
@@ -543,7 +596,7 @@ function startApp(id){
 }
 
 function showPage(p){
-  ["overview","tasks","members","schedule"].forEach(id=>{
+  ["overview","tasks","members","schedule","admin"].forEach(id=>{
     const pe=$("page-"+id);if(pe)pe.classList.toggle("hidden",id!==p);
     const ne=$("nav-"+id);if(ne)ne.classList.toggle("active",id===p);
   });
@@ -561,6 +614,7 @@ document.addEventListener("click",e=>{if(e.target.classList.contains("overlay"))
 function renderAll(){
   renderStats();renderDonut();renderBars();renderChildrenStars();
   renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
+  if(isAdminUser&&isAdminUser()) renderAdminPage();
 }
 
 // ── STATS ──
@@ -794,6 +848,82 @@ function applyDP(b,i){const a=i===selDay;b.style.background=a?"linear-gradient(1
 function buildQuickSubj(){const qs=$("quick-subj");if(!qs)return;qs.innerHTML="";Object.entries(SI).forEach(([s,icon])=>{const b=document.createElement("button");b.className="subj-btn";b.textContent=icon+" "+s;b.onclick=()=>{$("sf-subject").value=s;};qs.appendChild(b);});}
 function scheduleNotifs(){Object.values(notifTimers).forEach(clearTimeout);notifTimers={};Object.values(tasks).forEach(t=>{if(t.done||!t.date||!t.time)return;const diff=new Date(t.date+"T"+t.time).getTime()-Date.now()-300000;if(diff>0)notifTimers[t.id]=setTimeout(()=>{if(typeof Notification!=="undefined"&&Notification.permission==="granted")new Notification("⏰ "+t.title,{body:"بعد 5 دقائق!"});toast("⏰ "+t.title+" — بعد 5 دقائق!");},diff);});}
 function addSlot(){if(!activeChild)return;const from=$("sf-from").value,to=$("sf-to").value,subject=$("sf-subject").value.trim();if(!from||!to||!subject){toast("⚠️ يرجى تعبئة الوقت والنشاط");return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+activeChild+"/"+id).set({id,day:selDay,from,to,subject});$("sf-from").value="";$("sf-to").value="";$("sf-subject").value="";closeModal("slot-modal");toast("📅 تمت إضافة النشاط!");}
+// ── ADMIN ──
+function isAdminUser(){return clientId===ADMIN_USER;}
+
+function generateCodes(count){
+  if(!isAdminUser()){toast("⛔ هذه الميزة للمدير فقط");return;}
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let generated=0;
+  for(let i=0;i<count;i++){
+    let code="";
+    for(let j=0;j<8;j++) code+=chars[Math.floor(Math.random()*chars.length)];
+    code="SC-"+code; // SC = SmartClick prefix
+    db.ref("inviteCodes/"+code).once("value",snap=>{
+      if(!snap.exists()){
+        db.ref("inviteCodes/"+code).set({code,used:false,created:Date.now()});
+        generated++;
+      }
+    });
+  }
+  setTimeout(()=>toast("✅ تم توليد "+count+" كود جديد!"),500);
+}
+
+function renderAdminPage(){
+  if(!isAdminUser()) return;
+  db.ref("inviteCodes").once("value",snap=>{
+    const all=snap.val()||{};
+    const available=Object.values(all).filter(c=>!c.used);
+    const used=Object.values(all).filter(c=>c.used);
+
+    const ac=$("codes-available-count");if(ac)ac.textContent=available.length+" كود";
+    const uc=$("codes-used-count");if(uc)uc.textContent=used.length+" كود";
+
+    const avEl=$("codes-available-list");
+    if(avEl){
+      avEl.innerHTML="";
+      if(!available.length){avEl.innerHTML='<div class="empty-state" style="padding:20px 0"><div class="empty-icon" style="font-size:28px">🎟️</div><div>لا توجد كودات — اضغط توليد</div></div>';return;}
+      available.slice(0,100).forEach(c=>{
+        const row=document.createElement("div");row.className="code-item";
+        row.innerHTML=`
+          <span style="font-weight:700;letter-spacing:2px;color:var(--grad-start)">${c.code}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="code-badge" style="background:#dcfce7;color:#059669">متاح</span>
+            <button onclick="copyCode('${c.code}')" style="background:var(--grad);color:#fff;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:inherit">نسخ</button>
+            <button onclick="deleteCode('${c.code}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;padding:4px 8px;cursor:pointer;font-size:11px;color:#ef4444">🗑</button>
+          </div>`;
+        avEl.appendChild(row);
+      });
+    }
+
+    const usEl=$("codes-used-list");
+    if(usEl){
+      usEl.innerHTML="";
+      if(!used.length){usEl.innerHTML='<div class="empty-state" style="padding:20px 0"><div>لا توجد كودات مستخدمة بعد</div></div>';return;}
+      used.slice(-50).reverse().forEach(c=>{
+        const row=document.createElement("div");row.className="code-item used";
+        const date=c.usedAt?new Date(c.usedAt).toLocaleDateString("ar-SA"):"";
+        row.innerHTML=`
+          <span style="font-weight:700;letter-spacing:2px">${c.code}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--muted)">${c.usedBy||""} · ${date}</span>
+            <span class="code-badge" style="background:#f1f5f9;color:var(--muted)">مستخدم</span>
+          </div>`;
+        usEl.appendChild(row);
+      });
+    }
+  });
+}
+
+function copyCode(code){
+  navigator.clipboard.writeText(code).then(()=>toast("📋 تم نسخ الكود: "+code)).catch(()=>{prompt("انسخ الكود:",code);});
+}
+function deleteCode(code){
+  if(!confirm("حذف هذا الكود؟"))return;
+  db.ref("inviteCodes/"+code).remove();
+  setTimeout(()=>{if(isAdminUser())renderAdminPage();},300);
+}
+
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
 </script>
 </body>
