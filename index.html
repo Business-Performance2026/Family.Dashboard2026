@@ -285,12 +285,12 @@ textarea{resize:none;height:58px;}
       <div class="sidebar-client">مرحباً، <span id="sidebar-name">—</span></div>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">📊</span><span>نظرة عامة</span></div>
+      <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">🏠</span><span>الشاشة الرئيسية</span></div>
       <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks"><span class="nav-icon">✅</span><span>المهام</span></div>
       <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon">👥</span><span>موكلو المهام</span></div>
       <div class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">🛡️</span><span>الإدارة</span></div>
       <div class="nav-item" onclick="showPage('maid')" id="nav-maid"><span class="nav-icon">🧹</span><span>مهام العاملة</span></div>
-      <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">📅</span><span>الجداول</span></div>
+      <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">🌟</span><span>تقييم الأطفال</span></div>
     </nav>
     <div class="sidebar-bottom">
       <button class="logout-btn" onclick="doLogout()"><span>🚪</span><span class="logout-label">تسجيل خروج</span></button>
@@ -305,8 +305,8 @@ textarea{resize:none;height:58px;}
     <!-- OVERVIEW -->
     <div id="page-overview">
       <div class="page-header">
-        <div><div class="page-title">نظرة عامة 📊</div><div class="page-sub" id="today-date"></div></div>
-        <div style="display:flex;gap:10px"><button class="btn-grad" onclick="openModal('task-modal')">＋ مهمة جديدة</button></div>
+        <div><div class="page-title">الشاشة الرئيسية 🏠</div><div class="page-sub" id="today-date"></div></div>
+        <div style="display:flex;gap:10px"><button class="btn-grad" onclick="openFreshTaskModal()">＋ مهمة جديدة</button></div>
       </div>
       <div class="stats-row">
         <div class="stat-card fadeUp" style="animation-delay:.05s"><div class="stat-stripe" style="background:var(--grad)"></div><div class="stat-icon">⚡</div><div class="stat-num" id="stat-pending" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</div><div class="stat-label">مهام معلقة</div></div>
@@ -428,7 +428,7 @@ textarea{resize:none;height:58px;}
     <!-- SCHEDULE -->
     <div id="page-schedule" class="hidden">
       <div class="page-header">
-        <div><div class="page-title">الجداول 📅</div><div class="page-sub">جداول الأطفال الأسبوعية</div></div>
+        <div><div class="page-title">تقييم الأطفال 🌟</div><div class="page-sub">جداول ونجوم وتقييم الأطفال الأسبوعية</div></div>
         <div><button class="btn-grad" onclick="openModal('child-modal')">＋ إضافة طفل</button></div>
       </div>
       <div style="padding:14px 28px 28px">
@@ -572,7 +572,7 @@ textarea{resize:none;height:58px;}
 </div>
 <div id="task-modal" class="overlay hidden">
   <div class="modal">
-    <div class="modal-title">➕ مهمة جديدة <button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
+    <div class="modal-title" id="task-modal-title">➕ مهمة جديدة <button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
     <div class="form-col">
       <div><div class="field-label">العنوان *</div><input type="text" id="tf-title" placeholder="عنوان المهمة"/></div>
       <div><div class="field-label">ملاحظة</div><textarea id="tf-note" placeholder="تفاصيل إضافية..."></textarea></div>
@@ -583,7 +583,8 @@ textarea{resize:none;height:58px;}
       <div><div class="field-label">الأولوية</div><div class="p-btns" id="priority-btns"></div></div>
       <div><div class="field-label">المسؤول (اختياري)</div><div id="task-assign-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div></div>
     </div>
-    <button class="save-btn" style="margin-top:14px" onclick="addTask()">💾 حفظ المهمة</button>
+    <input type="hidden" id="tf-edit-id"/>
+    <button class="save-btn" style="margin-top:14px" id="task-save-btn" onclick="saveTask()">💾 حفظ المهمة</button>
   </div>
 </div>
 <div id="child-modal" class="overlay hidden">
@@ -597,6 +598,33 @@ textarea{resize:none;height:58px;}
     <button class="save-btn" style="margin-top:14px" onclick="addChild()">💾 إضافة الطفل</button>
   </div>
 </div>
+<!-- مكافأة الطفل -->
+<div id="child-reward-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">🎁 تحديد مكافأة الطفل <button class="modal-close" onclick="closeModal('child-reward-modal')">✕</button></div>
+    <div class="form-col">
+      <div id="child-reward-name" style="font-size:14px;font-weight:700;color:var(--text);padding:8px 0"></div>
+      <div><div class="field-label">الحد الأدنى للنجوم (نسبة من الأنشطة)</div>
+        <div style="display:flex;gap:8px">
+          <button class="p-btn" onclick="setChildRewardPct(70)" data-pct="70" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700">70%</button>
+          <button class="p-btn" onclick="setChildRewardPct(80)" data-pct="80" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700">80%</button>
+          <button class="p-btn" onclick="setChildRewardPct(90)" data-pct="90" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700">90%</button>
+          <button class="p-btn" onclick="setChildRewardPct(100)" data-pct="100" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700">100%</button>
+        </div>
+      </div>
+      <div><div class="field-label">المكافأة *</div><input type="text" id="child-reward-input" placeholder="مثال: رحلة، لعبة، مصروف إضافي..."/></div>
+      <div><div class="field-label">هل يستحق المكافأة الآن؟</div>
+        <div style="display:flex;gap:8px">
+          <button id="reward-approve-btn" onclick="setChildRewardApproval(true)" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;border:2px solid var(--border2);background:var(--card2);color:var(--muted)">✅ يستحق</button>
+          <button id="reward-reject-btn" onclick="setChildRewardApproval(false)" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;border:2px solid var(--border2);background:var(--card2);color:var(--muted)">❌ لا يستحق</button>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="child-reward-id"/>
+    <button class="save-btn" style="margin-top:14px" onclick="saveChildReward()">💾 حفظ</button>
+  </div>
+</div>
+
 <div id="slot-modal" class="overlay hidden">
   <div class="modal">
     <div class="modal-title">📅 إضافة نشاط <button class="modal-close" onclick="closeModal('slot-modal')">✕</button></div>
@@ -719,6 +747,7 @@ function startApp(id){
   db.ref("clients/"+clientId+"/stars").on("value",snap=>{stars=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/members").on("value",snap=>{members=snap.val()||{};renderAll();});
   startMaidListeners();
+  startChildRewardListener();
 }
 
 function showPage(p){
@@ -731,8 +760,22 @@ function showPage(p){
 
 function openModal(id){
   $(id).classList.remove("hidden");
-  if(id==="task-modal"){buildTaskAssignBtns();}
+  if(id==="task-modal"){
+    if(!editTaskId){
+      // تأكد إن الموديل فارغ للإضافة الجديدة
+      $("task-modal-title").innerHTML='➕ مهمة جديدة <button class="modal-close" onclick="closeModal(\'task-modal\')">✕</button>';
+    }
+    buildTaskAssignBtns();
+  }
   if(id==="member-modal"){buildMemberColorPicker();}
+}
+
+function openFreshTaskModal(){
+  editTaskId=null;
+  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>{const el=$(x);if(el)el.value="";});
+  selPriority="medium";selAssign=null;
+  buildPriorityBtns();
+  openModal("task-modal");
 }
 function closeModal(id){$(id).classList.add("hidden");}
 document.addEventListener("click",e=>{if(e.target.classList.contains("overlay"))closeModal(e.target.id);});
@@ -812,8 +855,41 @@ function renderDonut(){
 
 function renderBars(){
   const l=Object.values(tasks),total=l.length||1;
-  const data=[{label:"عالية",color:"#ef4444",count:l.filter(t=>t.priority==="high").length},{label:"متوسطة",color:"#d97706",count:l.filter(t=>t.priority==="medium").length},{label:"منخفضة",color:"#0891b2",count:l.filter(t=>t.priority==="low").length},{label:"مكتملة",color:"#059669",count:l.filter(t=>t.done).length}];
-  ["priority-bars","priority-bars-2"].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML="";data.forEach(d=>{const pct=Math.round(d.count/total*100);const row=document.createElement("div");row.className="bar-row";row.innerHTML=`<div class="bar-label">${d.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.color}"></div></div><div class="bar-val" style="color:${d.color}">${d.count}</div>`;el.appendChild(row);});});
+  const data=[
+    {label:"عالية",color:"#ef4444",count:l.filter(t=>t.priority==="high").length},
+    {label:"متوسطة",color:"#d97706",count:l.filter(t=>t.priority==="medium").length},
+    {label:"منخفضة",color:"#0891b2",count:l.filter(t=>t.priority==="low").length},
+    {label:"مكتملة",color:"#059669",count:l.filter(t=>t.done).length}
+  ];
+  ["priority-bars","priority-bars-2"].forEach(id=>{
+    const el=$(id);if(!el)return;el.innerHTML="";
+    // أعمدة عمودية
+    const wrap=document.createElement("div");
+    wrap.style.cssText="display:flex;align-items:flex-end;gap:10px;height:120px;padding:0 4px";
+    data.forEach(d=>{
+      const pct=total>0?Math.round(d.count/total*100):0;
+      const col=document.createElement("div");
+      col.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px";
+      col.innerHTML=`
+        <div style="font-size:12px;font-weight:700;color:${d.color}">${d.count}</div>
+        <div style="width:100%;background:${d.color};border-radius:6px 6px 0 0;height:${Math.max(pct,2)}%;min-height:4px;max-height:100px;transition:height .6s cubic-bezier(.22,1,.36,1);position:relative" title="${pct}%">
+          <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap">${pct}%</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:2px">${d.label}</div>
+      `;
+      wrap.appendChild(col);
+    });
+    // خط الأساس
+    const base=document.createElement("div");
+    base.style.cssText="";
+    const container=document.createElement("div");
+    container.style.cssText="position:relative";
+    container.appendChild(wrap);
+    const baseline=document.createElement("div");
+    baseline.style.cssText="height:2px;background:var(--border2);border-radius:1px;margin:0 4px";
+    container.appendChild(baseline);
+    el.appendChild(container);
+  });
 }
 
 function getChildStars(cid){let t=0;Object.values(stars[cid]||{}).forEach(s=>{t+=parseInt(s.stars||0);});return t;}
@@ -822,12 +898,56 @@ function renderChildrenStars(){
   const el=$("children-stars-overview");if(!el)return;el.innerHTML="";
   const cl=Object.values(children);
   if(!cl.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">⭐</div><div>أضف أطفالاً لعرض نجومهم</div></div>';return;}
-  cl.forEach(c=>{
-    const tot=getChildStars(c.id);
-    const row=document.createElement("div");row.className="child-star-row";
-    const starsStr=tot>0?("⭐".repeat(Math.min(tot,10))+(tot>10?` +${tot-10}`:"")):`<span style="color:var(--dim);font-size:12px">لا توجد نجوم بعد</span>`;
-    row.innerHTML=`<div class="child-star-name"><div style="background:${c.color};width:10px;height:10px;border-radius:50%"></div>${esc(c.name)}${c.age?` (${c.age})`:""}</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px">${starsStr}</span>${tot>0?`<span class="star-badge">${tot} ⭐</span>`:""}</div>`;
-    el.appendChild(row);
+  cl.forEach(ch=>{
+    const tot=getChildStars(ch.id);
+    // حساب نسبة النجوم من الأنشطة
+    const slots=schedules[ch.id]?Object.values(schedules[ch.id]):[];
+    const totalSlots=slots.length;
+    const maxStars=totalSlots*3;
+    const starPct=maxStars>0?Math.round(tot/maxStars*100):0;
+    const reward=childRewards[ch.id]||{};
+    const hasReward=reward.text&&reward.approved===true;
+    const reachedThreshold=reward.text&&starPct>=(reward.threshold||90);
+
+    const card=document.createElement("div");
+    card.style.cssText="background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;transition:all .2s;";
+    if(hasReward) card.style.borderColor="#f59e0b";
+
+    const starsStr=tot>0?("⭐".repeat(Math.min(tot,8))+(tot>8?` +${tot-8}`:"")):"<span style="color:var(--dim);font-size:12px">لا توجد نجوم بعد</span>";
+
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${ch.color}"></div>
+          <span style="font-size:13px;font-weight:700;color:var(--text)">${esc(ch.name)}${ch.age?" ("+ch.age+")":""}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="star-badge">${tot} ⭐</span>
+          <button onclick="openChildRewardModal('${ch.id}')" style="background:var(--grad);color:#fff;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700">🎁 مكافأة</button>
+        </div>
+      </div>
+      <div style="font-size:12px;margin-bottom:6px">${starsStr}</div>
+      ${totalSlots>0?`
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;background:#f0eaff;border-radius:4px;height:7px;overflow:hidden">
+          <div style="height:100%;width:${starPct}%;background:linear-gradient(90deg,${ch.color},#f59e0b);border-radius:4px;transition:width .6s ease"></div>
+        </div>
+        <span style="font-size:10px;color:var(--muted);white-space:nowrap">${starPct}%</span>
+      </div>`:""}
+      ${hasReward?`
+      <div style="margin-top:10px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fcd34d;border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🎁</span>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#92400e">مكافأة مستحقة!</div>
+          <div style="font-size:12px;font-weight:900;color:#d97706">${esc(reward.text)}</div>
+        </div>
+      </div>`:""}
+      ${reward.text&&reward.approved===false?`
+      <div style="margin-top:8px;background:#f1f5f9;border-radius:10px;padding:6px 10px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+        <span>⏳</span> المكافأة المحددة: ${esc(reward.text)} (لم يُقرَّر بعد)
+      </div>`:""}
+    `;
+    el.appendChild(card);
   });
 }
 
@@ -905,6 +1025,7 @@ function renderAllTasks(){
     <div style="flex:1"><div class="task-text${t.done?" done":""}">${esc(t.title)}</div>
     <div class="task-info">${t.date?"📅 "+t.date:""}${t.time?" ⏰ "+t.time:""}${mem?`<span style="background:${mem.color}22;color:${mem.color};border-radius:8px;padding:1px 8px;font-size:10px;font-weight:700">👤 ${esc(mem.name)}</span>`:""}</div></div>
     <span class="p-pill" style="background:${p.bg};color:${p.color}">${p.label}</span>
+    <button onclick="openEditTask('${t.id}')" style="background:var(--card3);border:1px solid var(--border2);border-radius:8px;padding:4px 8px;cursor:pointer;font-size:12px;color:var(--text2);margin-left:4px">✏️</button>
     <button class="del-x" onclick="deleteTask('${t.id}')">✕</button>`;
     el.appendChild(d);
   });
@@ -1095,6 +1216,114 @@ function deleteCode(code){
   if(!confirm("حذف هذا الكود؟"))return;
   db.ref("inviteCodes/"+code).remove();
   setTimeout(()=>{if(isAdminUser())renderAdminPage();},300);
+}
+
+
+// ── EDIT TASK ──
+let editTaskId = null;
+
+function openEditTask(id){
+  const t=tasks[id];if(!t)return;
+  editTaskId=id;
+  $("tf-title").value=t.title||"";
+  $("tf-note").value=t.note||"";
+  $("tf-date").value=t.date||"";
+  $("tf-time").value=t.time||"";
+  selPriority=t.priority||"medium";
+  selAssign=t.assignedTo||null;
+  buildPriorityBtns();
+  buildTaskAssignBtns();
+  $("task-modal-title").innerHTML='✏️ تعديل المهمة <button class="modal-close" onclick="closeModal('task-modal')">✕</button>';
+  openModal("task-modal");
+}
+
+function saveTask(){
+  const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}
+  if(editTaskId){
+    // تعديل
+    const data={title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority};
+    if(selAssign) data.assignedTo=selAssign; else data.assignedTo=null;
+    setSync("syncing","جاري الحفظ...");
+    db.ref("clients/"+clientId+"/tasks/"+editTaskId).update(data);
+    editTaskId=null;
+    toast("✏️ تم تعديل المهمة!");
+  } else {
+    // إضافة جديدة
+    const id=uid();setSync("syncing","جاري الحفظ...");
+    const data={id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false};
+    if(selAssign) data.assignedTo=selAssign;
+    db.ref("clients/"+clientId+"/tasks/"+id).set(data);
+    toast("✅ تمت إضافة المهمة!");
+  }
+  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");
+  selPriority="medium";selAssign=null;
+  buildPriorityBtns();
+  // Reset title
+  $("task-modal-title").innerHTML='➕ مهمة جديدة <button class="modal-close" onclick="closeModal('task-modal')">✕</button>';
+  closeModal("task-modal");
+}
+
+// ── CHILD REWARD ──
+let childRewardPct=90, childRewardApproval=null, childRewards={};
+
+function startChildRewardListener(){
+  db.ref("clients/"+clientId+"/childRewards").on("value",snap=>{
+    childRewards=snap.val()||{};
+    renderChildrenStars();
+  });
+}
+
+function openChildRewardModal(childId){
+  const child=children[childId];if(!child)return;
+  $("child-reward-id").value=childId;
+  $("child-reward-name").textContent="👶 "+child.name+(child.age?" ("+child.age+")":"");
+  const existing=childRewards[childId]||{};
+  $("child-reward-input").value=existing.text||"";
+  childRewardPct=existing.threshold||90;
+  childRewardApproval=existing.approved!==undefined?existing.approved:null;
+  setChildRewardPct(childRewardPct);
+  // set approval buttons
+  updateRewardApprovalBtns();
+  openModal("child-reward-modal");
+}
+
+function setChildRewardPct(pct){
+  childRewardPct=pct;
+  document.querySelectorAll("#child-reward-modal .p-btn[data-pct]").forEach(b=>{
+    const active=parseInt(b.dataset.pct)===pct;
+    b.style.background=active?"#fef3c7":"#f8f6ff";
+    b.style.border="2px solid "+(active?"#f59e0b":"var(--border2)");
+    b.style.color=active?"#d97706":"var(--muted)";
+  });
+}
+
+function setChildRewardApproval(val){
+  childRewardApproval=val;
+  updateRewardApprovalBtns();
+}
+
+function updateRewardApprovalBtns(){
+  const appBtn=$("reward-approve-btn"),rejBtn=$("reward-reject-btn");
+  if(!appBtn||!rejBtn)return;
+  appBtn.style.background=childRewardApproval===true?"#dcfce7":"#f8f6ff";
+  appBtn.style.border="2px solid "+(childRewardApproval===true?"#059669":"var(--border2)");
+  appBtn.style.color=childRewardApproval===true?"#059669":"var(--muted)";
+  rejBtn.style.background=childRewardApproval===false?"#fee2e2":"#f8f6ff";
+  rejBtn.style.border="2px solid "+(childRewardApproval===false?"#ef4444":"var(--border2)");
+  rejBtn.style.color=childRewardApproval===false?"#ef4444":"var(--muted)";
+}
+
+function saveChildReward(){
+  const childId=$("child-reward-id").value;
+  const text=($("child-reward-input").value||"").trim();
+  if(!text){$("child-reward-input").focus();return;}
+  db.ref("clients/"+clientId+"/childRewards/"+childId).set({
+    text, threshold:childRewardPct,
+    approved:childRewardApproval,
+    updatedAt:Date.now()
+  });
+  closeModal("child-reward-modal");
+  toast("🎁 تم حفظ مكافأة "+children[childId].name+"!");
 }
 
 
