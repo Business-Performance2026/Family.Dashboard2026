@@ -572,7 +572,7 @@ textarea{resize:none;height:58px;}
 </div>
 <div id="task-modal" class="overlay hidden">
   <div class="modal">
-    <div class="modal-title" id="task-modal-title">➕ مهمة جديدة <button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
+    <div class="modal-title"><span id="task-modal-title">➕ مهمة جديدة</span> <button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
     <div class="form-col">
       <div><div class="field-label">العنوان *</div><input type="text" id="tf-title" placeholder="عنوان المهمة"/></div>
       <div><div class="field-label">ملاحظة</div><textarea id="tf-note" placeholder="تفاصيل إضافية..."></textarea></div>
@@ -762,8 +762,8 @@ function openModal(id){
   $(id).classList.remove("hidden");
   if(id==="task-modal"){
     if(!editTaskId){
-      // تأكد إن الموديل فارغ للإضافة الجديدة
-      $("task-modal-title").innerHTML='➕ مهمة جديدة <button class="modal-close" onclick="closeModal(\'task-modal\')">✕</button>';
+      var mt=$("task-modal-title");
+      if(mt) mt.textContent="➕ مهمة جديدة";
     }
     buildTaskAssignBtns();
   }
@@ -1031,17 +1031,7 @@ function renderAllTasks(){
   });
 }
 
-function addTask(){
-  const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}
-  const id=uid();setSync("syncing","جاري الحفظ...");
-  const data={id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false};
-  if(selAssign) data.assignedTo=selAssign;
-  db.ref("clients/"+clientId+"/tasks/"+id).set(data);
-  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");
-  selPriority="medium";selAssign=null;
-  buildPriorityBtns();
-  closeModal("task-modal");toast("✅ تمت إضافة المهمة!");
-}
+function addTask(){saveTask();}
 function toggleTask(id){if(!tasks[id])return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).update({done:!tasks[id].done});}
 function deleteTask(id){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).remove();}
 
@@ -1233,7 +1223,8 @@ function openEditTask(id){
   selAssign=t.assignedTo||null;
   buildPriorityBtns();
   buildTaskAssignBtns();
-  $("task-modal-title").innerHTML='✏️ تعديل المهمة <button class="modal-close" onclick="closeModal('task-modal')">✕</button>';
+  var mt=$("task-modal-title");
+  if(mt) mt.textContent="✏️ تعديل المهمة";
   openModal("task-modal");
 }
 
@@ -1259,8 +1250,10 @@ function saveTask(){
   selPriority="medium";selAssign=null;
   buildPriorityBtns();
   // Reset title
-  $("task-modal-title").innerHTML='➕ مهمة جديدة <button class="modal-close" onclick="closeModal('task-modal')">✕</button>';
+  var mt=$("task-modal-title");
+  if(mt) mt.textContent="➕ مهمة جديدة";
   closeModal("task-modal");
+  editTaskId=null;
 }
 
 // ── CHILD REWARD ──
