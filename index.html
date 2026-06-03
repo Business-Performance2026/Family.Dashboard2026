@@ -287,7 +287,7 @@ textarea{resize:none;height:58px;}
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">🏠</span><span>الشاشة الرئيسية</span></div>
       <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks"><span class="nav-icon">✅</span><span>المهام</span></div>
-      <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon">👥</span><span>موكلو المهام</span></div>
+      <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon" style="background:#1BCEDF22;border-radius:8px;padding:3px;color:#1BCEDF">👤</span><span>توكيل مهمة لفرد</span></div>
       <div class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">🛡️</span><span>الإدارة</span></div>
       <div class="nav-item" onclick="showPage('maid')" id="nav-maid"><span class="nav-icon">🧹</span><span>مهام العاملة</span></div>
       <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">🌟</span><span>تقييم الأطفال</span></div>
@@ -357,8 +357,8 @@ textarea{resize:none;height:58px;}
         <!-- موكلو المهام -->
         <div class="panel fadeUp" style="animation-delay:.45s">
           <div class="panel-head">
-            <div class="panel-title"><div class="panel-dot" style="background:#8b5cf6"></div>موكلو المهام 👥</div>
-            <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('members')">إدارة الأشخاص</button>
+            <div class="panel-title"><div class="panel-dot" style="background:#1BCEDF"></div>توكيل مهمة لفرد 👤</div>
+            <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('members')" style="border-color:#1BCEDF;color:#1BCEDF">إدارة الأفراد</button>
           </div>
           <div class="panel-body">
             <div id="members-overview-list"></div>
@@ -414,12 +414,12 @@ textarea{resize:none;height:58px;}
     <!-- MEMBERS -->
     <div id="page-members" class="hidden">
       <div class="page-header">
-        <div><div class="page-title">موكلو المهام 👥</div><div class="page-sub">إدارة الأشخاص وتوكيل المهام</div></div>
+        <div><div class="page-title">توكيل مهمة لفرد 👤</div><div class="page-sub">توزيع المهام على أفراد العائلة</div></div>
         <div><button class="btn-grad" onclick="openModal('member-modal')">＋ إضافة شخص</button></div>
       </div>
       <div class="content-grid wide" style="padding-bottom:28px">
         <div class="panel fadeUp">
-          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:var(--grad-start)"></div>أفراد العائلة</div></div>
+          <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:#1BCEDF"></div>الأفراد وإنجازاتهم</div></div>
           <div class="panel-body"><div id="members-list"></div></div>
         </div>
       </div>
@@ -457,7 +457,7 @@ textarea{resize:none;height:58px;}
       <div class="page-header">
         <div><div class="page-title">مهام العاملة 🧹</div><div class="page-sub">تتبع المهام اليومية وتقييم الأداء</div></div>
         <div style="display:flex;gap:10px">
-          <button class="btn-grad" onclick="openModal('maid-reward-modal')" style="background:linear-gradient(135deg,#f59e0b,#fcd34d);color:#fff">🎁 تحديد المكافأة</button>
+          <button class="btn-grad" onclick="openMaidRewardModal()" style="background:linear-gradient(135deg,#f59e0b,#fcd34d);color:#fff">🎁 تحديد المكافأة</button>
           <button class="btn-grad" onclick="openModal('maid-task-modal')">＋ إضافة مهمة</button>
           <button class="btn-grad" onclick="resetMaidTasks()" style="background:linear-gradient(135deg,#059669,#34d399)">🔄 تجديد يومي</button>
         </div>
@@ -545,18 +545,25 @@ textarea{resize:none;height:58px;}
 <!-- تحديد المكافأة -->
 <div id="maid-reward-modal" class="overlay hidden">
   <div class="modal">
-    <div class="modal-title">🎁 تحديد المكافأة <button class="modal-close" onclick="closeModal('maid-reward-modal')">✕</button></div>
+    <div class="modal-title">🎁 تحديد مكافأة العاملة <button class="modal-close" onclick="closeModal('maid-reward-modal')">✕</button></div>
     <div class="form-col">
-      <div><div class="field-label">الحد الأدنى للتقييم (من 5)</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="reward-threshold-btns">
-          <button class="p-btn" onclick="setRewardThreshold(3)" data-v="3" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700">3 ⭐</button>
-          <button class="p-btn" onclick="setRewardThreshold(4)" data-v="4" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700">4 ⭐</button>
-          <button class="p-btn" onclick="setRewardThreshold(5)" data-v="5" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700">5 ⭐</button>
+      <div style="background:var(--card2);border-radius:12px;padding:12px;border:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">📊 أداء اليوم الحالي</div>
+        <div id="maid-reward-stats-preview" style="font-size:13px;font-weight:700;color:var(--text)"></div>
+      </div>
+      <div>
+        <div class="field-label">نوع المكافأة *</div>
+        <input type="text" id="maid-reward-input" placeholder="مثال: يوم إجازة، هدية، مكافأة مالية..."/>
+      </div>
+      <div>
+        <div class="field-label">قرار رب البيت</div>
+        <div style="display:flex;gap:8px">
+          <button id="maid-approve-btn" onclick="setMaidApproval(true)" style="flex:1;padding:11px;border-radius:11px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;border:2px solid var(--border2);background:var(--card2);color:var(--muted);transition:all .2s">✅ تستحق المكافأة</button>
+          <button id="maid-reject-btn" onclick="setMaidApproval(false)" style="flex:1;padding:11px;border-radius:11px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;border:2px solid var(--border2);background:var(--card2);color:var(--muted);transition:all .2s">❌ لا تستحق</button>
         </div>
       </div>
-      <div><div class="field-label">المكافأة *</div><input type="text" id="maid-reward-input" placeholder="مثال: يوم إجازة، هدية، مكافأة مالية..."/></div>
     </div>
-    <button class="save-btn" style="margin-top:14px" onclick="saveMaidReward()">💾 حفظ المكافأة</button>
+    <button class="save-btn" style="margin-top:14px" onclick="saveMaidReward()">💾 حفظ القرار</button>
   </div>
 </div>
 
@@ -1403,23 +1410,41 @@ function resetMaidTasks(){
   toast("🔄 تم تجديد مهام اليوم!");
 }
 
-function setRewardThreshold(v){
-  selRewardThreshold=v;
-  document.querySelectorAll("#reward-threshold-btns .p-btn").forEach(b=>{
-    const active=parseInt(b.dataset.v)===v;
-    b.style.background=active?"#fef3c7":"#f8f6ff";
-    b.style.border="2px solid "+(active?"#f59e0b":"var(--border2)");
-    b.style.color=active?"#d97706":"var(--muted)";
-  });
+let maidApproval=null;
+
+function setMaidApproval(val){
+  maidApproval=val;
+  const ab=$("maid-approve-btn"),rb=$("maid-reject-btn");
+  if(ab){ab.style.background=val===true?"#dcfce7":"var(--card2)";ab.style.borderColor=val===true?"#059669":"var(--border2)";ab.style.color=val===true?"#166534":"var(--muted)";}
+  if(rb){rb.style.background=val===false?"#fee2e2":"var(--card2)";rb.style.borderColor=val===false?"#ef4444":"var(--border2)";rb.style.color=val===false?"#ef4444":"var(--muted)";}
+}
+
+function openMaidRewardModal(){
+  // عرض إحصائيات اليوم
+  const stats=getMaidStats();
+  const prev=$("maid-reward-stats-preview");
+  if(prev) prev.innerHTML=
+    `✅ ${stats.done}/${stats.total} مهمة مكتملة (${stats.pct}%)` +
+    (stats.rated>0?` · ⭐ متوسط التقييم ${stats.avgRating.toFixed(1)}/5`:" · ⭐ لم يتم التقييم بعد");
+  // استعادة القرار السابق
+  const existing=maidReward;
+  $("maid-reward-input").value=existing.text||"";
+  maidApproval=existing.approved!==undefined?existing.approved:null;
+  setMaidApproval(maidApproval);
+  openModal("maid-reward-modal");
 }
 
 function saveMaidReward(){
   const text=($("maid-reward-input").value||"").trim();
   if(!text){$("maid-reward-input").focus();return;}
-  maidReward={threshold:selRewardThreshold,text};
+  if(maidApproval===null){toast("⚠️ حدد قراراً أولاً");return;}
+  maidReward={text,approved:maidApproval,savedAt:Date.now()};
   db.ref("clients/"+clientId+"/maidReward").set(maidReward);
-  closeModal("maid-reward-modal");toast("🎁 تم حفظ المكافأة!");
+  closeModal("maid-reward-modal");
+  toast(maidApproval?"🎁 تم إقرار المكافأة للعاملة!":"📋 تم حفظ القرار");
 }
+
+function setRewardThreshold(v){} // kept for compatibility
 
 function getTodayStr(){
   const n=new Date();
@@ -1448,7 +1473,7 @@ function renderMaidPage(){
   // مكافأة
   const wrap=$("maid-reward-banner-wrap");
   if(wrap){
-    const qualified=stats.rated>0&&stats.avgRating>=maidReward.threshold&&stats.pct>=80&&maidReward.text;
+    const qualified=maidReward.approved===true&&maidReward.text;
     wrap.classList.toggle("hidden",!qualified);
     const rt=$("maid-reward-text");if(rt&&maidReward.text)rt.textContent=maidReward.text;
   }
@@ -1506,7 +1531,7 @@ function renderMaidOverviewCard(){
 
   // بطاقة المكافأة
   const rewardWrap=$("maid-reward-overview");
-  const qualified=stats.rated>0&&stats.avgRating>=maidReward.threshold&&stats.pct>=80&&maidReward.text;
+  const qualified=maidReward.approved===true&&maidReward.text;
   if(rewardWrap){
     rewardWrap.classList.toggle("hidden",!qualified);
     const rt=$("maid-reward-overview-text");if(qualified&&rt)rt.textContent=maidReward.text;
