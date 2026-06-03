@@ -312,7 +312,7 @@ textarea{resize:none;height:58px;}
         <div class="stat-card fadeUp" style="animation-delay:.05s"><div class="stat-stripe" style="background:var(--grad)"></div><div class="stat-icon">⚡</div><div class="stat-num" id="stat-pending" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</div><div class="stat-label">مهام معلقة</div></div>
         <div class="stat-card fadeUp" style="animation-delay:.1s"><div class="stat-stripe" style="background:linear-gradient(90deg,#059669,#34d399)"></div><div class="stat-icon">✅</div><div class="stat-num" id="stat-done" style="color:#059669">0</div><div class="stat-label">مهام مكتملة</div></div>
         <div class="stat-card fadeUp" style="animation-delay:.15s"><div class="stat-stripe" style="background:linear-gradient(90deg,#1BCEDF,#67e8f9)"></div><div class="stat-icon">👶</div><div class="stat-num" id="stat-children" style="color:#0891b2">0</div><div class="stat-label">أطفال</div></div>
-        <div class="stat-card fadeUp" style="animation-delay:.2s"><div class="stat-stripe" style="background:linear-gradient(90deg,#f59e0b,#fcd34d)"></div><div class="stat-icon">⭐</div><div class="stat-num" id="stat-stars" style="color:#d97706">0</div><div class="stat-label">إجمالي النجوم</div></div>
+        <div class="stat-card fadeUp" style="animation-delay:.2s"><div class="stat-stripe" style="background:linear-gradient(90deg,#f59e0b,#fcd34d)"></div><div class="stat-icon">⭐</div><div class="stat-num" id="stat-stars" style="color:#d97706">0</div><div class="stat-label">إجمالي النجوم</div><div id="stat-stars-detail" style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.8;max-height:80px;overflow-y:auto"></div></div>
       </div>
       <div class="content-grid" style="padding-top:14px">
         <div class="panel fadeUp" style="animation-delay:.25s">
@@ -652,7 +652,7 @@ const COLORS=["#5B247A","#1BCEDF","#8b5cf6","#ea580c","#059669","#ec4899","#0891
 const PC={high:{label:"عالية",color:"#ef4444",bg:"#fee2e2"},medium:{label:"متوسطة",color:"#d97706",bg:"#fef3c7"},low:{label:"منخفضة",color:"#0891b2",bg:"#e0f2fe"}};
 const SI={"رياضيات":"🔢","عربي":"📖","إنجليزي":"🔤","علوم":"🔬","دين":"🌙","رياضة":"⚽","فن":"🎨","موسيقى":"🎵","تاريخ":"📜","جغرافيا":"🌍","نوم":"😴","طعام":"🍽️","حرة":"🎮","قرآن":"📚","تلفزيون":"📺","مذاكرة":"✏️"};
 
-let clientId=null,tasks={},children={},schedules={},stars={},members={};
+let clientId=null,tasks={},children={},schedules={},stars={},members={},slotsDone={};
 let activeChild=null,selPriority="medium",selColor=COLORS[0],selDay=new Date().getDay();
 let selMemberColor=COLORS[0],selAssign=null,taskFilter="all";
 let notifTimers={},_id=Date.now();
@@ -746,6 +746,7 @@ function startApp(id){
   db.ref("clients/"+clientId+"/schedules").on("value",snap=>{schedules=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/stars").on("value",snap=>{stars=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/members").on("value",snap=>{members=snap.val()||{};renderAll();});
+  db.ref("clients/"+clientId+"/slotsDone").on("value",snap=>{slotsDone=snap.val()||{};renderAll();});
   startMaidListeners();
   startChildRewardListener();
 }
@@ -842,6 +843,22 @@ function renderStats(){
   $("stat-children").textContent=Object.keys(children).length;
   let tot=0;Object.values(stars).forEach(cs=>Object.values(cs||{}).forEach(s=>{tot+=parseInt(s.stars||0);}));
   $("stat-stars").textContent=tot;
+  // تفاصيل نجوم كل طفل
+  const detail=$("stat-stars-detail");
+  if(detail){
+    const cl=Object.values(children);
+    if(cl.length){
+      detail.innerHTML=cl.map(ch=>{
+        const s=getChildStars(ch.id);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:1px 0">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${ch.color};display:inline-block"></span>${esc(ch.name)}</span>
+          <span style="font-weight:700;color:#d97706">${s} ⭐</span>
+        </div>`;
+      }).join("");
+    } else {
+      detail.innerHTML="";
+    }
+  }
 }
 
 function renderDonut(){
@@ -958,17 +975,27 @@ function renderTodaySchedule(){
   const todayStr=`${y}-${m}-${dd}`;
   const items=[];
   Object.values(tasks).filter(t=>t.date===todayStr).forEach(t=>{items.push({type:"task",time:t.time||"00:00",data:t});});
-  Object.values(children).forEach(c=>{(schedules[c.id]?Object.values(schedules[c.id]):[]).filter(s=>s.day===todayDay).forEach(s=>items.push({type:"slot",time:s.from||"00:00",data:{...s,childName:c.name,childColor:c.color}}));});
+  Object.values(children).forEach(ch=>{(schedules[ch.id]?Object.values(schedules[ch.id]):[]).filter(s=>s.day===todayDay).forEach(s=>{
+    const slotDone=(slotsDone[ch.id]&&slotsDone[ch.id][s.id])||false;
+    items.push({type:"slot",time:s.from||"00:00",data:{...s,childId:ch.id,childName:ch.name,childColor:ch.color,slotDone}});
+  });});
   if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📅</div><div>لا توجد مهام أو أنشطة اليوم</div></div>';return;}
   items.sort((a,b)=>a.time.localeCompare(b.time));
   items.forEach(item=>{
     const d=document.createElement("div");d.className="activity-item";
     if(item.type==="task"){
       const t=item.data,p=PC[t.priority]||PC.medium;
-      d.innerHTML=`<div class="activity-dot" style="background:${p.bg};font-size:16px">${t.done?"✅":"📋"}</div><div style="flex:1"><div class="activity-title" style="${t.done?"text-decoration:line-through;opacity:.55":""}">${esc(t.title)}</div><div class="activity-meta">${t.time?"⏰ "+t.time+" ":""}<span style="background:${p.bg};color:${p.color};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">${p.label}</span></div></div><button onclick="toggleTask('${t.id}')" style="background:${p.bg};border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;color:${p.color};font-weight:700;white-space:nowrap">${t.done?"↩":"✔ إنجاز"}</button>`;
+      d.innerHTML=`<div class="activity-dot" style="background:${p.bg};font-size:16px">${t.done?"✅":"📋"}</div>
+        <div style="flex:1"><div class="activity-title" style="${t.done?"text-decoration:line-through;opacity:.55":""}">${esc(t.title)}</div>
+        <div class="activity-meta">${t.time?"⏰ "+t.time+" ":""}<span style="background:${p.bg};color:${p.color};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">${p.label}</span></div></div>
+        <button onclick="toggleTask('${t.id}')" style="background:${t.done?"#dcfce7":"#f0fdf4"};border:1px solid ${t.done?"#86efac":"#bbf7d0"};border-radius:8px;padding:5px 11px;cursor:pointer;font-size:11px;color:${t.done?"#166534":"#15803d"};font-weight:700;white-space:nowrap;flex-shrink:0">${t.done?"✅ منجز":"⬜ إنجاز"}</button>`;
     } else {
       const s=item.data;
-      d.innerHTML=`<div class="activity-dot" style="background:${s.childColor}22;font-size:18px">${SI[s.subject]||"📌"}</div><div style="flex:1"><div class="activity-title">${esc(s.subject)}</div><div class="activity-meta">⏰ ${s.from}–${s.to} · <span style="background:${s.childColor}22;color:${s.childColor};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">👶 ${esc(s.childName)}</span></div></div>`;
+      const slotDone=(s.slotDone===true);
+      d.innerHTML=`<div class="activity-dot" style="background:${s.childColor}22;font-size:18px">${SI[s.subject]||"📌"}</div>
+        <div style="flex:1"><div class="activity-title" style="${slotDone?"text-decoration:line-through;opacity:.6":""}">${esc(s.subject)}</div>
+        <div class="activity-meta">⏰ ${s.from}–${s.to} · <span style="background:${s.childColor}22;color:${s.childColor};border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">👶 ${esc(s.childName)}</span></div></div>
+        <button onclick="toggleSlotDone('${s.childId}','${s.id}')" style="background:${slotDone?"#dcfce7":"#f0fdf4"};border:1px solid ${slotDone?"#86efac":"#bbf7d0"};border-radius:8px;padding:5px 11px;cursor:pointer;font-size:11px;color:${slotDone?"#166534":"#15803d"};font-weight:700;white-space:nowrap;flex-shrink:0">${slotDone?"✅ منجز":"⬜ إنجاز"}</button>`;
     }
     el.appendChild(d);
   });
@@ -1477,43 +1504,52 @@ function renderMaidOverviewCard(){
   const el=$("maid-overview-card");if(!el)return;
   const stats=getMaidStats();
 
-  // بطاقة المكافأة المنفصلة
+  // بطاقة المكافأة
   const rewardWrap=$("maid-reward-overview");
-  const rewardText=$("maid-reward-overview-text");
-  const rewardSub=$("maid-reward-overview-sub");
   const qualified=stats.rated>0&&stats.avgRating>=maidReward.threshold&&stats.pct>=80&&maidReward.text;
   if(rewardWrap){
     rewardWrap.classList.toggle("hidden",!qualified);
-    if(qualified&&rewardText) rewardText.textContent=maidReward.text;
-    if(qualified&&rewardSub) rewardSub.textContent="متوسط التقييم "+stats.avgRating.toFixed(1)+" من 5 · "+stats.pct+"% إنجاز";
+    const rt=$("maid-reward-overview-text");if(qualified&&rt)rt.textContent=maidReward.text;
+    const rs=$("maid-reward-overview-sub");if(qualified&&rs)rs.textContent="متوسط التقييم "+stats.avgRating.toFixed(1)+" من 5 · "+stats.pct+"% إنجاز";
   }
 
-  if(!stats.total){
-    el.innerHTML='<div style="text-align:center;color:var(--dim);padding:20px;font-size:13px">🧹 لا توجد مهام للعاملة اليوم</div>';
+  const list=Object.values(maidTasks);
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;color:var(--dim);padding:16px;font-size:13px">🧹 لا توجد مهام — أضف من قسم مهام العاملة</div>';
     return;
   }
 
-  el.innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#5B247A,#1BCEDF);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧹</div>
+  // رأس البطاقة + شريط التقدم
+  let html=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🧹</div>
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:700;color:var(--text)">عاملة المنزل</div>
-        <div style="font-size:11px;color:var(--muted)">${stats.total} مهمة · ${stats.done} مكتملة</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">عاملة المنزل</div>
+        <div style="font-size:11px;color:var(--muted)">${stats.done}/${stats.total} مكتملة · ⭐${stats.avgRating.toFixed(1)}/5</div>
       </div>
-      <div style="text-align:center;background:${stats.avgRating>=4?"#fef3c7":"var(--card3)"};border-radius:10px;padding:6px 10px">
-        <div style="font-size:18px;font-weight:900;color:#d97706">${stats.avgRating.toFixed(1)}</div>
-        <div style="font-size:9px;color:var(--muted)">من 5 ⭐</div>
-      </div>
+      <span style="font-size:14px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${stats.pct}%</span>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
-      <span>✅ ${stats.done} مكتملة</span>
-      <span>⏳ ${stats.total-stats.done} متبقية</span>
-      <span style="font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${stats.pct}%</span>
+    <div style="background:#f0eaff;border-radius:5px;height:7px;overflow:hidden;margin-bottom:12px">
+      <div style="height:100%;width:${stats.pct}%;background:var(--grad);border-radius:5px;transition:width .6s ease"></div>
     </div>
-    <div style="background:#f0eaff;border-radius:6px;height:9px;overflow:hidden">
-      <div style="height:100%;width:${stats.pct}%;background:var(--grad);border-radius:6px;transition:width .6s ease"></div>
-    </div>
+    <div style="display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto">
   `;
+
+  list.sort((a,b)=>a.done===b.done?0:a.done?1:-1).forEach(t=>{
+    html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${t.done?"#f0fdf4":"var(--card2)"};border-radius:10px;border:1px solid ${t.done?"#86efac":"var(--border)"}">
+      <span style="font-size:14px;flex-shrink:0">${t.done?"✅":"⬜"}</span>
+      <span style="flex:1;font-size:12px;font-weight:600;color:var(--text);${t.done?"text-decoration:line-through;opacity:.6":""}">${esc(t.title)}</span>
+      <button onclick="toggleMaidTask('${t.id}')" style="background:${t.done?"#dcfce7":"var(--grad)"};color:${t.done?"#166534":"#fff"};border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0">${t.done?"منجز ✓":"إنجاز"}</button>
+    </div>`;
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function toggleSlotDone(childId,slotId){
+  const current=(slotsDone[childId]&&slotsDone[childId][slotId])||false;
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/slotsDone/"+childId+"/"+slotId).set(!current);
 }
 
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
