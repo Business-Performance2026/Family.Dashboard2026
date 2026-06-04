@@ -441,6 +441,7 @@ textarea{resize:none;height:58px;}
                 <div class="panel-title" id="schedule-panel-title"></div>
                 <div style="display:flex;gap:8px;align-items:center">
                   <div id="child-total-stars" style="font-size:13px;color:#d97706;font-weight:700"></div>
+                  <button id="edit-child-btn" onclick="openEditChildModal(activeChild)" style="background:var(--card3);border:1px solid var(--border2);border-radius:10px;padding:7px 12px;cursor:pointer;font-size:12px;color:var(--text2)">✏️ تعديل</button>
                   <button class="btn-danger" id="del-child-btn">🗑 حذف</button>
                   <button class="btn-grad" onclick="openModal('slot-modal')">＋ إضافة نشاط</button>
                 </div>
@@ -605,6 +606,63 @@ textarea{resize:none;height:58px;}
     <button class="save-btn" style="margin-top:14px" onclick="addChild()">💾 إضافة الطفل</button>
   </div>
 </div>
+<!-- تعديل فرد -->
+<div id="edit-member-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">✏️ تعديل الشخص <button class="modal-close" onclick="closeModal('edit-member-modal')">✕</button></div>
+    <div class="form-col">
+      <div><div class="field-label">الاسم *</div><input type="text" id="edit-mem-name" placeholder="اسم الشخص"/></div>
+      <div><div class="field-label">اللون</div><div class="color-row" id="edit-member-color-picker"></div></div>
+    </div>
+    <input type="hidden" id="edit-mem-id"/>
+    <button class="save-btn" style="margin-top:14px" onclick="saveEditMember()">💾 حفظ التعديل</button>
+  </div>
+</div>
+
+<!-- تعديل نشاط الطفل -->
+<div id="edit-slot-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">✏️ تعديل النشاط <button class="modal-close" onclick="closeModal('edit-slot-modal')">✕</button></div>
+    <div class="form-col">
+      <div><div class="field-label">اليوم</div><div class="day-picker" id="edit-day-picker"></div></div>
+      <div class="form-row">
+        <div style="flex:1"><div class="field-label">من</div><input type="time" id="edit-sf-from"/></div>
+        <div style="flex:1"><div class="field-label">إلى</div><input type="time" id="edit-sf-to"/></div>
+      </div>
+      <div><div class="field-label">النشاط *</div><input type="text" id="edit-sf-subject" placeholder="اسم النشاط"/></div>
+    </div>
+    <input type="hidden" id="edit-slot-child-id"/>
+    <input type="hidden" id="edit-slot-id"/>
+    <button class="save-btn" style="margin-top:14px" onclick="saveEditSlot()">💾 حفظ التعديل</button>
+  </div>
+</div>
+
+<!-- تعديل مهمة العاملة -->
+<div id="edit-maid-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">✏️ تعديل مهمة العاملة <button class="modal-close" onclick="closeModal('edit-maid-modal')">✕</button></div>
+    <div class="form-col">
+      <div><div class="field-label">اسم المهمة *</div><input type="text" id="edit-maid-title" placeholder="اسم المهمة"/></div>
+    </div>
+    <input type="hidden" id="edit-maid-id"/>
+    <button class="save-btn" style="margin-top:14px" onclick="saveEditMaidTask()">💾 حفظ التعديل</button>
+  </div>
+</div>
+
+<!-- تعديل اسم طفل -->
+<div id="edit-child-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">✏️ تعديل بيانات الطفل <button class="modal-close" onclick="closeModal('edit-child-modal')">✕</button></div>
+    <div class="form-col">
+      <div><div class="field-label">الاسم *</div><input type="text" id="edit-child-name" placeholder="اسم الطفل"/></div>
+      <div><div class="field-label">العمر</div><input type="number" id="edit-child-age" min="0" max="18" placeholder="العمر"/></div>
+      <div><div class="field-label">اللون</div><div class="color-row" id="edit-child-color-picker"></div></div>
+    </div>
+    <input type="hidden" id="edit-child-id"/>
+    <button class="save-btn" style="margin-top:14px" onclick="saveEditChild()">💾 حفظ التعديل</button>
+  </div>
+</div>
+
 <!-- مكافأة الطفل -->
 <div id="child-reward-modal" class="overlay hidden">
   <div class="modal">
@@ -1125,7 +1183,10 @@ function renderMembersPage(){
           <span style="font-size:11px;color:var(--muted);white-space:nowrap">${done}/${total} مهمة · ${pct}%</span>
         </div>
       </div>
-      <button onclick="deleteMember('${m.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>`;
+      <div style="display:flex;gap:6px">
+        <button onclick="openEditMember('${m.id}')" style="background:var(--card3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:var(--text2)">✏️</button>
+        <button onclick="deleteMember('${m.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>
+      </div>`;
     el.appendChild(row);
   });
 }
@@ -1147,6 +1208,7 @@ function renderSchedulePage(){
   $("schedule-panel-title").innerHTML=`<div class="panel-dot" style="background:${child.color}"></div>جدول ${esc(child.name)}`;
   $("child-total-stars").textContent=ts>0?`${ts} ⭐ إجمالي النجوم`:"";
   $("del-child-btn").onclick=()=>deleteChild(activeChild);
+  const ecb=$("edit-child-btn");if(ecb)ecb.onclick=()=>openEditChildModal(activeChild);
   const grid=$("full-week-grid");grid.innerHTML="";
   const slots=schedules[activeChild]?Object.values(schedules[activeChild]):[];
   const cs=stars[activeChild]||{};
@@ -1161,7 +1223,7 @@ function renderSchedulePage(){
       let sh='<div class="fw-slot-stars">';
       for(let i=1;i<=3;i++) sh+=`<button class="fw-star" onclick="setStar('${activeChild}','${slot.id}',${i})">${i<=sv?"⭐":"☆"}</button>`;
       sh+='</div>';
-      sc.innerHTML=`<div class="fw-slot-icon">${SI[slot.subject]||"📌"}</div><div class="fw-slot-subj">${esc(slot.subject)}</div><div class="fw-slot-time">${slot.from}–${slot.to}</div>${sh}<button class="del-slot" onclick="deleteSlot('${activeChild}','${slot.id}')">✕</button>`;
+      sc.innerHTML=`<div class="fw-slot-icon">${SI[slot.subject]||"📌"}</div><div class="fw-slot-subj">${esc(slot.subject)}</div><div class="fw-slot-time">${slot.from}–${slot.to}</div>${sh}<div style="display:flex;gap:3px;margin-top:4px"><button onclick="openEditSlot('${activeChild}','${slot.id}')" style="flex:1;background:var(--card3);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:9px;color:var(--text2);padding:2px">✏️</button><button class="del-slot" style="position:relative;opacity:1;flex:1" onclick="deleteSlot('${activeChild}','${slot.id}')">🗑</button></div>`;
       col.appendChild(sc);
     });
     grid.appendChild(col);
@@ -1531,7 +1593,10 @@ function renderMaidPage(){
         <div style="font-size:13px;font-weight:700;color:var(--text);${t.done?"text-decoration:line-through;opacity:.6":""}">${esc(t.title)}</div>
         <div class="star-rating" style="margin-top:5px">${stars}</div>
       </div>
-      <button onclick="deleteMaidTask('${t.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:11px;color:#ef4444;flex-shrink:0">🗑</button>`;
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+        <button onclick="openEditMaidTask('${t.id}')" style="background:var(--card3);border:1px solid var(--border2);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:11px;color:var(--text2)">✏️</button>
+        <button onclick="deleteMaidTask('${t.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:11px;color:#ef4444">🗑</button>
+      </div>`;
     el.appendChild(row);
   });
 }
@@ -1586,6 +1651,136 @@ function toggleSlotDone(childId,slotId){
   const current=(slotsDone[childId]&&slotsDone[childId][slotId])||false;
   setSync("syncing","جاري الحفظ...");
   db.ref("clients/"+clientId+"/slotsDone/"+childId+"/"+slotId).set(!current);
+}
+
+
+// ── EDIT MEMBER ──
+let editMemberSelColor = COLORS[0];
+
+function openEditMember(id){
+  const m=members[id];if(!m)return;
+  $("edit-mem-id").value=id;
+  $("edit-mem-name").value=m.name||"";
+  editMemberSelColor=m.color||COLORS[0];
+  buildEditMemberColorPicker();
+  openModal("edit-member-modal");
+}
+
+function buildEditMemberColorPicker(){
+  const row=$("edit-member-color-picker");if(!row)return;row.innerHTML="";
+  COLORS.forEach(col=>{
+    const b=document.createElement("button");
+    b.className="color-dot"+(col===editMemberSelColor?" selected":"");
+    b.style.background=col;
+    b.onclick=()=>{editMemberSelColor=col;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===col));};
+    row.appendChild(b);
+  });
+}
+
+function saveEditMember(){
+  const id=$("edit-mem-id").value;
+  const name=$("edit-mem-name").value.trim();
+  if(!name){$("edit-mem-name").focus();return;}
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/members/"+id).update({name,color:editMemberSelColor});
+  closeModal("edit-member-modal");toast("✅ تم تعديل بيانات الشخص!");
+}
+
+// ── EDIT SLOT ──
+let editSlotSelDay=0;
+
+function openEditSlot(childId,slotId){
+  const slots=schedules[childId]||{};
+  const slot=Object.values(slots).find(s=>s.id===slotId);
+  if(!slot)return;
+  $("edit-slot-child-id").value=childId;
+  $("edit-slot-id").value=slotId;
+  $("edit-sf-from").value=slot.from||"";
+  $("edit-sf-to").value=slot.to||"";
+  $("edit-sf-subject").value=slot.subject||"";
+  editSlotSelDay=slot.day||0;
+  buildEditDayPicker();
+  openModal("edit-slot-modal");
+}
+
+function buildEditDayPicker(){
+  const dp=$("edit-day-picker");if(!dp)return;dp.innerHTML="";
+  DAYS_SHORT.forEach((d,i)=>{
+    const b=document.createElement("button");
+    b.className="day-pill";b.textContent=d;b.dataset.day=i;
+    applyEditDP(b,i);
+    b.onclick=()=>{editSlotSelDay=i;dp.querySelectorAll(".day-pill").forEach(x=>applyEditDP(x,parseInt(x.dataset.day)));};
+    dp.appendChild(b);
+  });
+}
+function applyEditDP(b,i){
+  const a=i===editSlotSelDay;
+  b.style.background=a?"linear-gradient(135deg,#f5eeff,#edfcff)":"var(--card2)";
+  b.style.border="1.5px solid "+(a?"#5B247A":"var(--border2)");
+  b.style.color=a?"#5B247A":"var(--muted)";
+}
+
+function saveEditSlot(){
+  const childId=$("edit-slot-child-id").value;
+  const slotId=$("edit-slot-id").value;
+  const subject=$("edit-sf-subject").value.trim();
+  const from=$("edit-sf-from").value;
+  const to=$("edit-sf-to").value;
+  if(!subject||!from||!to){toast("⚠️ يرجى تعبئة جميع الحقول");return;}
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/schedules/"+childId+"/"+slotId).update({subject,from,to,day:editSlotSelDay});
+  closeModal("edit-slot-modal");toast("✅ تم تعديل النشاط!");
+}
+
+// ── EDIT CHILD ──
+let editChildSelColor=COLORS[0];
+
+function openEditChildModal(id){
+  if(!id||!children[id])return;
+  const ch=children[id];
+  $("edit-child-id").value=id;
+  $("edit-child-name").value=ch.name||"";
+  $("edit-child-age").value=ch.age||"";
+  editChildSelColor=ch.color||COLORS[0];
+  buildEditChildColorPicker();
+  openModal("edit-child-modal");
+}
+
+function buildEditChildColorPicker(){
+  const row=$("edit-child-color-picker");if(!row)return;row.innerHTML="";
+  COLORS.forEach(col=>{
+    const b=document.createElement("button");
+    b.className="color-dot"+(col===editChildSelColor?" selected":"");
+    b.style.background=col;
+    b.onclick=()=>{editChildSelColor=col;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===col));};
+    row.appendChild(b);
+  });
+}
+
+function saveEditChild(){
+  const id=$("edit-child-id").value;
+  const name=$("edit-child-name").value.trim();
+  if(!name){$("edit-child-name").focus();return;}
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/children/"+id).update({name,age:$("edit-child-age").value,color:editChildSelColor});
+  closeModal("edit-child-modal");toast("✅ تم تعديل بيانات الطفل!");
+}
+
+// ── EDIT MAID TASK ──
+function openEditMaidTask(id){
+  const t=maidTasks[id];if(!t)return;
+  $("edit-maid-id").value=id;
+  $("edit-maid-title").value=t.title||"";
+  openModal("edit-maid-modal");
+}
+
+function saveEditMaidTask(){
+  const id=$("edit-maid-id").value;
+  const title=$("edit-maid-title").value.trim();
+  if(!title){$("edit-maid-title").focus();return;}
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/maidTasks/"+id).update({title});
+  closeModal("edit-maid-modal");toast("✅ تم تعديل المهمة!");
 }
 
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
