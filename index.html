@@ -1066,8 +1066,19 @@ function renderAllTasks(){
 }
 
 function addTask(){saveTask();}
-function toggleTask(id){if(!tasks[id])return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).update({done:!tasks[id].done});}
-function deleteTask(id){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/tasks/"+id).remove();}
+function toggleTask(id){
+  if(!tasks[id])return;
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/tasks/"+id).update({done:!tasks[id].done})
+    .then(()=>setSync("online","متصل — يتزامن تلقائياً 🔄"))
+    .catch(e=>{toast("❌ خطأ في الحفظ: "+e.message);setSync("offline","خطأ في الاتصال");});
+}
+function deleteTask(id){
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/tasks/"+id).remove()
+    .then(()=>setSync("online","متصل — يتزامن تلقائياً 🔄"))
+    .catch(e=>{toast("❌ خطأ في الحذف: "+e.message);setSync("offline","خطأ في الاتصال");});
+}
 
 // ── MEMBERS ──
 function buildMemberColorPicker(){
