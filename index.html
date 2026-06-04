@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icon.svg"/>
 <title>لوحة العائلة</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
@@ -27,7 +27,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:'Noto Kufi Arabic',sans-serif;background:linear-gradient(145deg,#f3eeff,#e8f4ff,#edfcff,#f5eeff);background-attachment:fixed;color:var(--text);min-height:100vh;direction:rtl;overflow-x:hidden;}
+body{font-family:'El Messiri','Noto Kufi Arabic',sans-serif;background:linear-gradient(145deg,#f3eeff,#e8f4ff,#edfcff,#f5eeff);background-attachment:fixed;color:var(--text);min-height:100vh;direction:rtl;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 10% 10%,#5B247A18,transparent 50%),radial-gradient(ellipse at 90% 90%,#1BCEDF14,transparent 50%);pointer-events:none;z-index:0;}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:#f0eaff;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
@@ -42,7 +42,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .auth-logo{font-size:58px;margin-bottom:14px;}
 .auth-title{font-size:24px;font-weight:900;background:var(--grad);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
 .auth-sub{color:var(--muted);font-size:13px;margin-bottom:26px;line-height:1.8;}
-.auth-input{background:#faf8ff;border:2px solid var(--border2);border-radius:13px;padding:13px 16px;color:var(--text);font-size:15px;font-family:inherit;outline:none;width:100%;margin-bottom:10px;transition:all .25s;text-align:right;}
+.auth-input{background:#faf8ff;border:2px solid var(--border2);border-radius:13px;padding:13px 16px;color:var(--text);font-size:15px;font-family:'El Messiri','Noto Kufi Arabic',sans-serif;outline:none;width:100%;margin-bottom:10px;transition:all .25s;text-align:right;}
 .auth-input:focus{border-color:var(--grad-start);box-shadow:0 0 0 4px #5B247A12;}
 .auth-btn{width:100%;background:var(--grad);color:#fff;border:none;border-radius:13px;padding:14px;cursor:pointer;font-size:15px;font-weight:900;font-family:inherit;transition:all .25s;box-shadow:0 8px 28px #5B247A44;margin-top:4px;}
 .auth-btn:hover{transform:translateY(-2px);}
@@ -53,6 +53,23 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .auth-hint{color:var(--dim);font-size:11px;margin-top:14px;line-height:2;}
 
 /* SYNC */
+/* ── NOTIFICATION BELL ── */
+#notif-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 22px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);position:relative;z-index:1;}
+.notif-bell-btn{position:relative;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:10px;transition:background .2s;display:flex;align-items:center;gap:6px;font-family:inherit;}
+.notif-bell-btn:hover{background:var(--card2);}
+.notif-badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+.notif-dropdown{position:absolute;top:100%;left:20px;right:20px;background:var(--card);border:1px solid var(--border2);border-radius:16px;box-shadow:0 12px 40px #5B247A28;z-index:999;max-height:320px;overflow-y:auto;animation:fadeUp .2s ease;display:none;}
+.notif-dropdown.open{display:block;}
+.notif-item{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;cursor:default;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item:hover{background:var(--card2);}
+.notif-item.urgent{border-right:3px solid var(--red);}
+.notif-item.soon{border-right:3px solid var(--orange);}
+.notif-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.notif-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.notif-time{font-size:11px;color:var(--muted);}
+.notif-empty{text-align:center;color:var(--dim);padding:24px;font-size:13px;}
+
 #sync-bar{display:flex;align-items:center;gap:8px;padding:6px 24px;font-size:11px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);color:var(--muted);position:relative;z-index:1;}
 #sync-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:background .3s;}
 #sync-bar.online #sync-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
@@ -299,6 +316,20 @@ textarea{resize:none;height:58px;}
 
   <div id="app-wrap">
     <div id="sync-bar-wrap">
+      <!-- شريط الإشعارات -->
+      <div id="notif-bar">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="notif-bell-btn" onclick="toggleNotifDropdown()" id="notif-bell-btn">
+            <span style="font-size:20px">🔔</span>
+            <span style="font-size:12px;color:var(--muted)" id="notif-bell-label">الإشعارات</span>
+            <span id="notif-badge" class="notif-badge hidden">0</span>
+          </button>
+        </div>
+        <div style="font-size:11px;color:var(--muted)" id="notif-summary"></div>
+      </div>
+      <div id="notif-dropdown" class="notif-dropdown">
+        <div id="notif-list"></div>
+      </div>
       <div id="sync-bar" class="syncing"><div id="sync-dot"></div><span id="sync-txt">جاري الاتصال...</span></div>
     </div>
 
@@ -1782,6 +1813,128 @@ function saveEditMaidTask(){
   db.ref("clients/"+clientId+"/maidTasks/"+id).update({title});
   closeModal("edit-maid-modal");toast("✅ تم تعديل المهمة!");
 }
+
+
+// ── NOTIFICATIONS SYSTEM ──
+let notifOpen = false;
+
+function toggleNotifDropdown(){
+  notifOpen = !notifOpen;
+  const dd=$("notif-dropdown");
+  if(dd) dd.classList.toggle("open", notifOpen);
+  if(notifOpen) buildNotifList();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener("click", function(e){
+  if(!e.target.closest("#notif-bell-btn") && !e.target.closest("#notif-dropdown")){
+    notifOpen=false;
+    const dd=$("notif-dropdown");
+    if(dd) dd.classList.remove("open");
+  }
+});
+
+function buildNotifList(){
+  const el=$("notif-list");if(!el)return;
+  const items=getNotifications();
+  if(!items.length){
+    el.innerHTML='<div class="notif-empty">🎉 لا توجد إشعارات حالياً</div>';
+    return;
+  }
+  el.innerHTML="";
+  items.forEach(n=>{
+    const d=document.createElement("div");
+    d.className="notif-item "+(n.urgent?"urgent":"soon");
+    d.innerHTML=`
+      <div class="notif-icon">${n.icon}</div>
+      <div style="flex:1">
+        <div class="notif-title">${esc(n.title)}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+      ${n.badge?`<span style="background:${n.urgent?"#fee2e2":"#fff7ed"};color:${n.urgent?"var(--red)":"var(--orange)"};border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700">${n.badge}</span>`:""}
+    `;
+    el.appendChild(d);
+  });
+}
+
+function getNotifications(){
+  const items=[];
+  const now=new Date();
+  const todayStr=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+  const nowMin=now.getHours()*60+now.getMinutes();
+
+  // مهام اليوم القريبة
+  Object.values(tasks).filter(t=>!t.done&&t.date===todayStr&&t.time).forEach(t=>{
+    const [h,m]=t.time.split(":").map(Number);
+    const taskMin=h*60+m;
+    const diff=taskMin-nowMin;
+    if(diff>=0&&diff<=120){
+      items.push({
+        icon:"📋",
+        title:t.title,
+        time:"⏰ "+t.time+(diff<=30?" — خلال "+diff+" دقيقة":" — خلال "+Math.round(diff/60)+" ساعة"),
+        urgent:diff<=30,
+        badge:diff<=30?"عاجل":"قريباً"
+      });
+    } else if(diff<0&&diff>=-30){
+      items.push({icon:"⚠️",title:t.title,time:"تأخرت "+Math.abs(diff)+" دقيقة",urgent:true,badge:"متأخرة"});
+    }
+  });
+
+  // مهام اليوم غير المنجزة
+  const pendingToday=Object.values(tasks).filter(t=>!t.done&&t.date===todayStr&&!t.time);
+  if(pendingToday.length){
+    items.push({icon:"📌",title:pendingToday.length+" مهمة لهذا اليوم لم تُنجز",time:"مهام اليوم",urgent:false,badge:pendingToday.length+""});
+  }
+
+  // أنشطة الأطفال اليوم
+  const todayDay=now.getDay();
+  Object.values(children).forEach(ch=>{
+    (schedules[ch.id]?Object.values(schedules[ch.id]):[]).filter(s=>s.day===todayDay).forEach(s=>{
+      const slotDone=(slotsDone[ch.id]&&slotsDone[ch.id][s.id])||false;
+      if(!slotDone&&s.from){
+        const [h,m]=s.from.split(":").map(Number);
+        const slotMin=h*60+m;
+        const diff=slotMin-nowMin;
+        if(diff>=0&&diff<=60){
+          items.push({icon:"👶",title:ch.name+" — "+s.subject,time:"⏰ "+s.from+" — خلال "+diff+" دقيقة",urgent:diff<=15,badge:diff<=15?"الآن":"قريباً"});
+        }
+      }
+    });
+  });
+
+  // مهام العاملة غير المنجزة
+  const maidPending=Object.values(maidTasks).filter(t=>!t.done);
+  if(maidPending.length){
+    items.push({icon:"🧹",title:"مهام العاملة — "+maidPending.length+" مهمة متبقية",time:"مهام عاملة المنزل",urgent:false,badge:maidPending.length+""});
+  }
+
+  // ترتيب: العاجل أولاً
+  items.sort((a,b)=>b.urgent-a.urgent);
+  return items;
+}
+
+function updateNotifBadge(){
+  const items=getNotifications();
+  const urgentCount=items.filter(n=>n.urgent).length;
+  const totalCount=items.length;
+  const badge=$("notif-badge");
+  const label=$("notif-bell-label");
+  const summary=$("notif-summary");
+  if(badge){
+    if(totalCount>0){badge.textContent=totalCount;badge.classList.remove("hidden");}
+    else{badge.classList.add("hidden");}
+  }
+  if(label) label.textContent=urgentCount>0?"إشعارات عاجلة!":"الإشعارات";
+  if(summary){
+    if(urgentCount>0) summary.innerHTML=`<span style="color:var(--red);font-weight:700">🔴 ${urgentCount} عاجل</span>`;
+    else if(totalCount>0) summary.innerHTML=`<span style="color:var(--orange)">${totalCount} إشعار</span>`;
+    else summary.textContent="";
+  }
+}
+
+// تحديث الإشعارات كل دقيقة
+setInterval(updateNotifBadge, 60000);
 
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
 </script>
