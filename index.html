@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 :root{
   --grad:linear-gradient(135deg,#5B247A,#1BCEDF);
@@ -165,6 +166,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .del-x:hover{color:var(--red);}
 
 /* MEMBERS */
+.photo-upload-wrap{position:relative;width:80px;height:80px;margin:0 auto 10px;}
+.photo-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border2);display:none;}
+.photo-placeholder{width:80px;height:80px;border-radius:50%;background:var(--card2);border:2px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:24px;transition:all .2s;}
+.photo-placeholder:hover{border-color:var(--grad-start);background:var(--card3);}
+.photo-del-btn{position:absolute;top:0;right:0;background:var(--red);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center;}
+.child-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
 .member-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;}
 .member-row{display:flex;gap:12px;align-items:center;padding:13px 16px;background:var(--card2);border-radius:13px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s;}
 .member-row:hover{border-color:var(--border2);background:var(--card3);}
@@ -603,6 +610,15 @@ textarea{resize:none;height:58px;}
   <div class="modal">
     <div class="modal-title">👤 إضافة شخص <button class="modal-close" onclick="closeModal('member-modal')">✕</button></div>
     <div class="form-col">
+      <div style="text-align:center">
+        <div class="field-label" style="text-align:right">صورة الشخص (اختياري)</div>
+        <div class="photo-upload-wrap" onclick="triggerPhotoUpload('member-photo-input')">
+          <img id="member-photo-preview" class="photo-preview"/>
+          <div id="member-photo-placeholder" class="photo-placeholder">📷<div style="font-size:10px;color:var(--muted);margin-top:2px">إضافة صورة</div></div>
+          <button class="photo-del-btn" id="member-photo-del" onclick="event.stopPropagation();removePhoto('member')">✕</button>
+        </div>
+        <input type="file" id="member-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'member')"/>
+      </div>
       <div><div class="field-label">الاسم *</div><input type="text" id="mem-name" placeholder="اسم الشخص"/></div>
       <div><div class="field-label">اللون</div><div class="color-row" id="member-color-picker"></div></div>
     </div>
@@ -630,6 +646,15 @@ textarea{resize:none;height:58px;}
   <div class="modal">
     <div class="modal-title">👶 إضافة طفل <button class="modal-close" onclick="closeModal('child-modal')">✕</button></div>
     <div class="form-col">
+      <div style="text-align:center">
+        <div class="field-label" style="text-align:right">صورة الطفل (اختياري)</div>
+        <div class="photo-upload-wrap" onclick="triggerPhotoUpload('child-photo-input')">
+          <img id="child-photo-preview" class="photo-preview"/>
+          <div id="child-photo-placeholder" class="photo-placeholder">📷<div style="font-size:10px;color:var(--muted);margin-top:2px">إضافة صورة</div></div>
+          <button class="photo-del-btn" id="child-photo-del" onclick="event.stopPropagation();removePhoto('child')">✕</button>
+        </div>
+        <input type="file" id="child-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'child')"/>
+      </div>
       <div><div class="field-label">الاسم *</div><input type="text" id="cf-name" placeholder="اسم الطفل"/></div>
       <div><div class="field-label">العمر</div><input type="number" id="cf-age" min="0" max="18" placeholder="العمر"/></div>
       <div><div class="field-label">اللون</div><div class="color-row" id="color-picker"></div></div>
@@ -685,6 +710,15 @@ textarea{resize:none;height:58px;}
   <div class="modal">
     <div class="modal-title">✏️ تعديل بيانات الطفل <button class="modal-close" onclick="closeModal('edit-child-modal')">✕</button></div>
     <div class="form-col">
+      <div style="text-align:center">
+        <div class="field-label" style="text-align:right">الصورة</div>
+        <div class="photo-upload-wrap" onclick="triggerPhotoUpload('edit-child-photo-input')">
+          <img id="edit-child-photo-preview" class="photo-preview"/>
+          <div id="edit-child-photo-placeholder" class="photo-placeholder">📷<div style="font-size:10px;color:var(--muted);margin-top:2px">تغيير الصورة</div></div>
+          <button class="photo-del-btn" id="edit-child-photo-del" onclick="event.stopPropagation();removeEditPhoto('edit-child')">✕</button>
+        </div>
+        <input type="file" id="edit-child-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'edit-child')"/>
+      </div>
       <div><div class="field-label">الاسم *</div><input type="text" id="edit-child-name" placeholder="اسم الطفل"/></div>
       <div><div class="field-label">العمر</div><input type="number" id="edit-child-age" min="0" max="18" placeholder="العمر"/></div>
       <div><div class="field-label">اللون</div><div class="color-row" id="edit-child-color-picker"></div></div>
@@ -741,6 +775,7 @@ textarea{resize:none;height:58px;}
 const firebaseConfig={apiKey:"AIzaSyAROFo8m5M2ETnVFWh86GkaMxThDV9S8fY",authDomain:"family-dashboard-e979a.firebaseapp.com",databaseURL:"https://family-dashboard-e979a-default-rtdb.firebaseio.com",projectId:"family-dashboard-e979a",storageBucket:"family-dashboard-e979a.firebasestorage.app",messagingSenderId:"945587305724",appId:"1:945587305724:web:647608b0676e3aa6a92b79"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
+const storage=firebase.storage();
 
 const DAYS_AR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const DAYS_SHORT=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
@@ -1031,7 +1066,7 @@ function renderChildrenStars(){
     card.innerHTML=`
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:10px;height:10px;border-radius:50%;background:${ch.color}"></div>
+          ${ch.photoUrl?`<img src="${ch.photoUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid ${ch.color}">`:`<div style="width:32px;height:32px;border-radius:50%;background:${ch.color};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff">${esc(ch.name).charAt(0)}</div>`}
           <span style="font-size:13px;font-weight:700;color:var(--text)">${esc(ch.name)}${ch.age?" ("+ch.age+")":""}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
@@ -1179,17 +1214,22 @@ function buildMemberColorPicker(){
   });
 }
 
-function addMember(){
+async function addMember(){
   const name=$("mem-name").value.trim();if(!name){$("mem-name").focus();return;}
   const id=uid();setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/members/"+id).set({id,name,color:selMemberColor});
+  const data={id,name,color:selMemberColor};
+  const photoUrl=await uploadPhoto("member",id,"members");
+  if(photoUrl) data.photoUrl=photoUrl;
+  db.ref("clients/"+clientId+"/members/"+id).set(data);
   $("mem-name").value="";
+  removePhoto("member");
   closeModal("member-modal");toast("👤 تمت إضافة "+name+"!");
 }
 
 function deleteMember(id){
   if(!confirm("حذف هذا الشخص؟"))return;
   setSync("syncing","جاري الحفظ...");
+  deletePhoto("members",id);
   db.ref("clients/"+clientId+"/members/"+id).remove();
 }
 
@@ -1204,7 +1244,7 @@ function renderMembersPage(){
     const pct=total?Math.round(done/total*100):0;
     const row=document.createElement("div");row.className="member-row";
     row.innerHTML=`
-      <div class="member-avatar" style="background:${m.color}">${esc(m.name).charAt(0)}</div>
+      ${m.photoUrl?`<img src="${m.photoUrl}" class="child-avatar" style="width:42px;height:42px;border:2px solid ${m.color}">`:`<div class="member-avatar" style="background:${m.color}">${esc(m.name).charAt(0)}</div>`}
       <div style="flex:1">
         <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">${esc(m.name)}</div>
         <div style="display:flex;align-items:center;gap:10px">
@@ -1224,15 +1264,28 @@ function renderMembersPage(){
 
 // ── CHILDREN ──
 function buildColorPicker(){const row=$("color-picker");if(!row)return;row.innerHTML="";COLORS.forEach(c=>{const b=document.createElement("button");b.className="color-dot"+(c===selColor?" selected":"");b.style.background=c;b.onclick=()=>{selColor=c;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===c));};row.appendChild(b);});}
-function addChild(){const name=$("cf-name").value.trim();if(!name){$("cf-name").focus();return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).set({id,name,age:$("cf-age").value,color:selColor});activeChild=id;$("cf-name").value="";$("cf-age").value="";selColor=COLORS[Object.keys(children).length%COLORS.length];buildColorPicker();closeModal("child-modal");toast("👶 تمت إضافة "+name+"!");}
-function deleteChild(id){if(!confirm("حذف هذا الطفل وجدوله ونجومه؟"))return;setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/children/"+id).remove();db.ref("clients/"+clientId+"/schedules/"+id).remove();db.ref("clients/"+clientId+"/stars/"+id).remove();}
+async function addChild(){
+  const name=$("cf-name").value.trim();if(!name){$("cf-name").focus();return;}
+  const id=uid();setSync("syncing","جاري الحفظ...");
+  const data={id,name,age:$("cf-age").value,color:selColor};
+  // رفع الصورة أولاً
+  const photoUrl=await uploadPhoto("child",id,"children");
+  if(photoUrl) data.photoUrl=photoUrl;
+  db.ref("clients/"+clientId+"/children/"+id).set(data);
+  activeChild=id;
+  $("cf-name").value="";$("cf-age").value="";
+  removePhoto("child");
+  selColor=COLORS[Object.keys(children).length%COLORS.length];buildColorPicker();
+  closeModal("child-modal");toast("👶 تمت إضافة "+name+"!");
+}
+function deleteChild(id){if(!confirm("حذف هذا الطفل وجدوله ونجومه؟"))return;setSync("syncing","جاري الحفظ...");deletePhoto("children",id);db.ref("clients/"+clientId+"/children/"+id).remove();db.ref("clients/"+clientId+"/schedules/"+id).remove();db.ref("clients/"+clientId+"/stars/"+id).remove();}
 
 // ── SCHEDULE ──
 function renderSchedulePage(){
   if(Object.keys(children).length===0){$("no-children").classList.remove("hidden");$("schedule-content").classList.add("hidden");return;}
   $("no-children").classList.add("hidden");$("schedule-content").classList.remove("hidden");
   const tabRow=$("child-tab-row");tabRow.innerHTML="";
-  Object.values(children).forEach(c=>{const ts=getChildStars(c.id);const b=document.createElement("div");b.className="ctab"+(c.id===activeChild?" active":"");b.innerHTML=`<span class="cdot" style="background:${c.color}"></span>${esc(c.name)}${c.age?` (${c.age})`:""} ${ts>0?`<span style="background:#fef3c7;color:#d97706;border-radius:8px;padding:1px 7px;font-size:11px">${ts}⭐</span>`:""}`;b.onclick=()=>{activeChild=c.id;renderSchedulePage();};tabRow.appendChild(b);});
+  Object.values(children).forEach(c=>{const ts=getChildStars(c.id);const b=document.createElement("div");b.className="ctab"+(c.id===activeChild?" active":"");b.innerHTML=`${c.photoUrl?`<img src="${c.photoUrl}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:2px solid ${c.color}">` :`<span class="cdot" style="background:${c.color}"></span>`}${esc(c.name)}${c.age?` (${c.age})`:""} ${ts>0?`<span style="background:#fef3c7;color:#d97706;border-radius:8px;padding:1px 7px;font-size:11px">${ts}⭐</span>`:""}`;b.onclick=()=>{activeChild=c.id;renderSchedulePage();};tabRow.appendChild(b);});
   if(!activeChild||!children[activeChild])return;
   const child=children[activeChild];
   const ts=getChildStars(child.id);
@@ -1685,6 +1738,88 @@ function toggleSlotDone(childId,slotId){
 }
 
 
+
+// ── PHOTO SYSTEM ──
+let pendingPhotos = {}; // {type: {file, dataUrl}}
+
+function triggerPhotoUpload(inputId){
+  $(inputId).click();
+}
+
+function previewPhoto(input, type){
+  const file=input.files[0];
+  if(!file)return;
+  // check size (max 2MB)
+  if(file.size>2*1024*1024){toast("⚠️ الصورة كبيرة جداً — الحد الأقصى 2MB");return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    pendingPhotos[type]={file,dataUrl:e.target.result};
+    const preview=$(type+"-photo-preview");
+    const placeholder=$(type+"-photo-placeholder");
+    const del=$(type+"-photo-del");
+    if(preview){preview.src=e.target.result;preview.style.display="block";}
+    if(placeholder) placeholder.style.display="none";
+    if(del) del.style.display="flex";
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(type){
+  delete pendingPhotos[type];
+  const preview=$(type+"-photo-preview");
+  const placeholder=$(type+"-photo-placeholder");
+  const del=$(type+"-photo-del");
+  const input=$(type+"-photo-input");
+  if(preview){preview.src="";preview.style.display="none";}
+  if(placeholder) placeholder.style.display="flex";
+  if(del) del.style.display="none";
+  if(input) input.value="";
+}
+
+async function uploadPhoto(type, entityId, folder){
+  const pending=pendingPhotos[type];
+  if(!pending) return null;
+  try{
+    const ext=pending.file.name.split(".").pop()||"jpg";
+    const ref=storage.ref("clients/"+clientId+"/"+folder+"/"+entityId+"."+ext);
+    await ref.put(pending.file);
+    const url=await ref.getDownloadURL();
+    delete pendingPhotos[type];
+    return url;
+  } catch(e){
+    console.error("Upload error:",e);
+    toast("⚠️ فشل رفع الصورة - سيتم الحفظ بدون صورة");
+    return null;
+  }
+}
+
+async function deletePhoto(folder, entityId){
+  try{
+    // Try to delete all common extensions
+    for(const ext of ["jpg","jpeg","png","webp"]){
+      try{
+        await storage.ref("clients/"+clientId+"/"+folder+"/"+entityId+"."+ext).delete();
+        break;
+      } catch(e){}
+    }
+  } catch(e){}
+}
+
+function showPhotoInEditModal(type, currentUrl){
+  const preview=$(type+"-photo-preview");
+  const placeholder=$(type+"-photo-placeholder");
+  const del=$(type+"-photo-del");
+  if(currentUrl){
+    if(preview){preview.src=currentUrl;preview.style.display="block";}
+    if(placeholder) placeholder.style.display="none";
+    if(del) del.style.display="flex";
+  } else {
+    if(preview){preview.src="";preview.style.display="none";}
+    if(placeholder) placeholder.style.display="flex";
+    if(del) del.style.display="none";
+  }
+}
+
 // ── EDIT MEMBER ──
 let editMemberSelColor = COLORS[0];
 
@@ -1774,7 +1909,17 @@ function openEditChildModal(id){
   $("edit-child-age").value=ch.age||"";
   editChildSelColor=ch.color||COLORS[0];
   buildEditChildColorPicker();
+  // show current photo
+  const prev=$("edit-child-photo-preview"),ph=$("edit-child-photo-placeholder"),del=$("edit-child-photo-del");
+  if(ch.photoUrl){if(prev){prev.src=ch.photoUrl;prev.style.display="block";}if(ph)ph.style.display="none";if(del)del.style.display="flex";}
+  else{if(prev){prev.src="";prev.style.display="none";}if(ph)ph.style.display="flex";if(del)del.style.display="none";}
   openModal("edit-child-modal");
+}
+
+function removeEditPhoto(type){
+  removePhoto(type);
+  // Mark for deletion
+  pendingPhotos[type+"_delete"]=true;
 }
 
 function buildEditChildColorPicker(){
@@ -1788,12 +1933,18 @@ function buildEditChildColorPicker(){
   });
 }
 
-function saveEditChild(){
+async function saveEditChild(){
   const id=$("edit-child-id").value;
   const name=$("edit-child-name").value.trim();
   if(!name){$("edit-child-name").focus();return;}
   setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/children/"+id).update({name,age:$("edit-child-age").value,color:editChildSelColor});
+  const data={name,age:$("edit-child-age").value,color:editChildSelColor};
+  // upload new photo if selected
+  const photoUrl=await uploadPhoto("edit-child",id,"children");
+  if(photoUrl) data.photoUrl=photoUrl;
+  // delete photo if marked
+  if(pendingPhotos["edit-child_delete"]){deletePhoto("children",id);data.photoUrl=null;delete pendingPhotos["edit-child_delete"];}
+  db.ref("clients/"+clientId+"/children/"+id).update(data);
   closeModal("edit-child-modal");toast("✅ تم تعديل بيانات الطفل!");
 }
 
