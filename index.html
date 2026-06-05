@@ -312,6 +312,7 @@ textarea{resize:none;height:58px;}
       <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks"><span class="nav-icon">✅</span><span>المهام</span></div>
       <div class="nav-item" onclick="showPage('members')" id="nav-members"><span class="nav-icon" style="background:#1BCEDF22;border-radius:8px;padding:3px;color:#1BCEDF">👤</span><span>توكيل مهمة لفرد</span></div>
       <div class="nav-item" onclick="showPage('admin')" id="nav-admin"><span class="nav-icon">🛡️</span><span>الإدارة</span></div>
+      <div class="nav-item" onclick="showPage('shopping')" id="nav-shopping"><span class="nav-icon">🛒</span><span>احتياجات المنزل</span></div>
       <div class="nav-item" onclick="showPage('maid')" id="nav-maid"><span class="nav-icon">🧹</span><span>مهام العاملة</span></div>
       <div class="nav-item" onclick="showPage('schedule')" id="nav-schedule"><span class="nav-icon">🌟</span><span>تقييم الأطفال</span></div>
     </nav>
@@ -386,6 +387,20 @@ textarea{resize:none;height:58px;}
         <div class="panel fadeUp" style="animation-delay:.4s">
           <div class="panel-head"><div class="panel-title"><div class="panel-dot" style="background:#1BCEDF"></div>جدول اليوم</div><button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('schedule')">عرض الكل</button></div>
           <div class="panel-body" style="padding:12px 16px"><div id="today-schedule-list"></div></div>
+        </div>
+      </div>
+
+      <!-- احتياجات المنزل في الشاشة الرئيسية -->
+      <div class="content-grid wide" style="padding-bottom:0">
+        <div class="panel fadeUp" style="animation-delay:.5s">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot" style="background:#059669"></div>احتياجات المنزل 🛒</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="ov-shop-cost" style="font-size:13px;font-weight:700;color:#d97706"></span>
+              <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="showPage('shopping')">إدارة القائمة</button>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:14px 18px"><div id="overview-shopping-list"></div></div>
         </div>
       </div>
 
@@ -485,6 +500,59 @@ textarea{resize:none;height:58px;}
               </div>
               <div class="panel-body"><div class="full-week" id="full-week-grid"></div></div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOPPING PAGE -->
+    <div id="page-shopping" class="hidden">
+      <div class="page-header">
+        <div><div class="page-title">احتياجات المنزل 🛒</div><div class="page-sub">قائمة المشتريات الأسبوعية</div></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-grad" onclick="openShopAdd()" style="background:linear-gradient(135deg,#059669,#34d399)">＋ إضافة غرض</button>
+        </div>
+      </div>
+
+      <!-- إحصائيات -->
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card fadeUp">
+          <div class="stat-stripe" style="background:linear-gradient(90deg,#5B247A,#1BCEDF)"></div>
+          <div class="stat-icon">📋</div>
+          <div class="stat-num" id="shop-total-num" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</div>
+          <div class="stat-label">إجمالي الأغراض</div>
+        </div>
+        <div class="stat-card fadeUp" style="animation-delay:.05s">
+          <div class="stat-stripe" style="background:linear-gradient(90deg,#ea580c,#fb923c)"></div>
+          <div class="stat-icon">⏳</div>
+          <div class="stat-num" id="shop-pending-num" style="color:#ea580c">0</div>
+          <div class="stat-label">لم تُشترَ بعد</div>
+        </div>
+        <div class="stat-card fadeUp" style="animation-delay:.1s">
+          <div class="stat-stripe" style="background:linear-gradient(90deg,#f59e0b,#fcd34d)"></div>
+          <div class="stat-icon">💰</div>
+          <div class="stat-num" id="shop-cost-num" style="color:#d97706">0</div>
+          <div class="stat-label">التكلفة الإجمالية (ريال)</div>
+        </div>
+      </div>
+
+      <div class="content-grid wide" style="padding-bottom:28px">
+        <div class="panel fadeUp">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot" style="background:#059669"></div>قائمة المشتريات</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="shop-week-label" style="font-size:11px;color:var(--muted)"></span>
+              <button onclick="clearBoughtItems()" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:6px 12px;cursor:pointer;font-size:12px;color:#ef4444;font-family:inherit">🗑 حذف المشتراة</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <!-- فلتر -->
+            <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+              <button class="task-filter-btn active" data-sf="all" onclick="setShopFilter('all')">الكل</button>
+              <button class="task-filter-btn" data-sf="pending" onclick="setShopFilter('pending')">⏳ لم تُشترَ</button>
+              <button class="task-filter-btn" data-sf="bought" onclick="setShopFilter('bought')">✅ تم الشراء</button>
+            </div>
+            <div id="shopping-list"></div>
           </div>
         </div>
       </div>
@@ -661,6 +729,33 @@ textarea{resize:none;height:58px;}
     <button class="save-btn" style="margin-top:14px" onclick="addChild()">💾 إضافة الطفل</button>
   </div>
 </div>
+<!-- إضافة غرض -->
+<div id="shopping-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title"><span id="shop-modal-title">🛒 إضافة غرض</span> <button class="modal-close" onclick="closeModal('shopping-modal')">✕</button></div>
+    <div class="form-col">
+      <div><div class="field-label">اسم الغرض *</div><input type="text" id="shop-name" placeholder="مثال: أرز، صابون، خضار..."/></div>
+      <div><div class="field-label">الكمية</div><input type="text" id="shop-qty" placeholder="مثال: كيلو، 2 علبة..."/></div>
+      <div><div class="field-label">السعر (ريال) — اختياري</div><input type="number" id="shop-price" placeholder="0.00" min="0" step="0.5"/></div>
+      <div>
+        <div class="field-label">الفئة</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="shop-cat-btns">
+          <button class="task-filter-btn active" data-cat="🥩 لحوم" onclick="setShopCat(this,'🥩 لحوم')">🥩 لحوم</button>
+          <button class="task-filter-btn" data-cat="🥦 خضار وفاكهة" onclick="setShopCat(this,'🥦 خضار وفاكهة')">🥦 خضار</button>
+          <button class="task-filter-btn" data-cat="🧴 منظفات" onclick="setShopCat(this,'🧴 منظفات')">🧴 منظفات</button>
+          <button class="task-filter-btn" data-cat="🍞 مخبوزات" onclick="setShopCat(this,'🍞 مخبوزات')">🍞 مخبوزات</button>
+          <button class="task-filter-btn" data-cat="🥛 ألبان وبيض" onclick="setShopCat(this,'🥛 ألبان وبيض')">🥛 ألبان</button>
+          <button class="task-filter-btn" data-cat="🧂 بهارات وجاف" onclick="setShopCat(this,'🧂 بهارات وجاف')">🧂 جاف</button>
+          <button class="task-filter-btn" data-cat="📦 أخرى" onclick="setShopCat(this,'📦 أخرى')">📦 أخرى</button>
+        </div>
+      </div>
+      <div><div class="field-label">ملاحظة</div><input type="text" id="shop-note" placeholder="أي تفاصيل إضافية..."/></div>
+    </div>
+    <input type="hidden" id="shop-edit-id"/>
+    <button class="save-btn" style="margin-top:14px" id="shop-save-btn" onclick="saveShopItem()">💾 إضافة للقائمة</button>
+  </div>
+</div>
+
 <!-- تعديل فرد -->
 <div id="edit-member-modal" class="overlay hidden">
   <div class="modal">
@@ -781,7 +876,7 @@ const COLORS=["#5B247A","#1BCEDF","#8b5cf6","#ea580c","#059669","#ec4899","#0891
 const PC={high:{label:"عالية",color:"#ef4444",bg:"#fee2e2"},medium:{label:"متوسطة",color:"#d97706",bg:"#fef3c7"},low:{label:"منخفضة",color:"#0891b2",bg:"#e0f2fe"}};
 const SI={"رياضيات":"🔢","عربي":"📖","إنجليزي":"🔤","علوم":"🔬","دين":"🌙","رياضة":"⚽","فن":"🎨","موسيقى":"🎵","تاريخ":"📜","جغرافيا":"🌍","نوم":"😴","طعام":"🍽️","حرة":"🎮","قرآن":"📚","تلفزيون":"📺","مذاكرة":"✏️"};
 
-let clientId=null,tasks={},children={},schedules={},stars={},members={},slotsDone={};
+let clientId=null,tasks={},children={},schedules={},stars={},members={},slotsDone={},shopItems={};
 let activeChild=null,selPriority="medium",selColor=COLORS[0],selDay=new Date().getDay();
 let selMemberColor=COLORS[0],selAssign=null,taskFilter="all";
 let notifTimers={},_id=Date.now();
@@ -876,12 +971,13 @@ function startApp(id){
   db.ref("clients/"+clientId+"/stars").on("value",snap=>{stars=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/members").on("value",snap=>{members=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/slotsDone").on("value",snap=>{slotsDone=snap.val()||{};renderAll();});
+  db.ref("clients/"+clientId+"/shopping").on("value",snap=>{shopItems=snap.val()||{};renderAll();});
   startMaidListeners();
   startChildRewardListener();
 }
 
 function showPage(p){
-  ["overview","tasks","members","maid","schedule","admin"].forEach(id=>{
+  ["overview","tasks","members","shopping","maid","schedule","admin"].forEach(id=>{
     const pe=$("page-"+id);if(pe)pe.classList.toggle("hidden",id!==p);
     const ne=$("nav-"+id);if(ne)ne.classList.toggle("active",id===p);
   });
@@ -1833,6 +1929,211 @@ function showPhotoInEditModal(type, currentUrl){
     if(placeholder) placeholder.style.display="flex";
     if(del) del.style.display="none";
   }
+}
+
+
+// ── SHOPPING LIST ──
+let shopFilter="all", shopCat="🥩 لحوم", shopEditId=null;
+
+function setShopFilter(f){
+  shopFilter=f;
+  document.querySelectorAll("[data-sf]").forEach(b=>b.classList.toggle("active",b.dataset.sf===f));
+  renderShoppingPage();
+}
+
+function setShopCat(btn,cat){
+  shopCat=cat;
+  document.querySelectorAll("[data-cat]").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function openShopAdd(){
+  shopEditId=null;
+  ["shop-name","shop-qty","shop-note"].forEach(id=>{const el=$(id);if(el)el.value="";});
+  const sp=$("shop-price");if(sp)sp.value="";
+  shopCat="🥩 لحوم";
+  document.querySelectorAll("[data-cat]").forEach(b=>b.classList.toggle("active",b.dataset.cat==="🥩 لحوم"));
+  const t=$("shop-modal-title");if(t)t.textContent="🛒 إضافة غرض";
+  const sb=$("shop-save-btn");if(sb)sb.textContent="💾 إضافة للقائمة";
+  openModal("shopping-modal");
+}
+
+function openShopEdit(id){
+  const item=shopItems[id];if(!item)return;
+  shopEditId=id;
+  const n=$(shop-name);if(n)n.value=item.name||"";
+  const q=$(shop-qty);if(q)q.value=item.qty||"";
+  const p=$(shop-price);if(p)p.value=item.price||"";
+  const no=$(shop-note);if(no)no.value=item.note||"";
+  shopCat=item.cat||"📦 أخرى";
+  document.querySelectorAll("[data-cat]").forEach(b=>b.classList.toggle("active",b.dataset.cat===shopCat));
+  const t=$("shop-modal-title");if(t)t.textContent="✏️ تعديل الغرض";
+  const sb=$("shop-save-btn");if(sb)sb.textContent="💾 حفظ التعديل";
+  openModal("shopping-modal");
+}
+
+function saveShopItem(){
+  const name=$("shop-name").value.trim();
+  if(!name){$("shop-name").focus();return;}
+  const data={
+    name,
+    qty:$("shop-qty").value.trim(),
+    price:parseFloat($("shop-price").value)||0,
+    note:$("shop-note").value.trim(),
+    cat:shopCat,
+    bought:false,
+    addedBy:clientId,
+    createdAt:Date.now()
+  };
+  setSync("syncing","جاري الحفظ...");
+  if(shopEditId){
+    // تعديل — احتفظ بحالة الشراء
+    data.bought=shopItems[shopEditId].bought||false;
+    db.ref("clients/"+clientId+"/shopping/"+shopEditId).set({...data,id:shopEditId});
+    toast("✅ تم تعديل الغرض!");
+  } else {
+    const id=uid();
+    data.id=id;
+    db.ref("clients/"+clientId+"/shopping/"+id).set(data);
+    toast("🛒 تمت إضافة "+name+" للقائمة!");
+  }
+  shopEditId=null;
+  closeModal("shopping-modal");
+}
+
+function toggleBought(id){
+  const item=shopItems[id];if(!item)return;
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/shopping/"+id).update({bought:!item.bought});
+}
+
+function deleteShopItem(id){
+  setSync("syncing","جاري الحفظ...");
+  db.ref("clients/"+clientId+"/shopping/"+id).remove();
+}
+
+function clearBoughtItems(){
+  if(!confirm("حذف جميع الأغراض المشتراة؟"))return;
+  setSync("syncing","جاري الحفظ...");
+  Object.values(shopItems).filter(i=>i.bought).forEach(i=>{
+    db.ref("clients/"+clientId+"/shopping/"+i.id).remove();
+  });
+  toast("🗑 تم حذف الأغراض المشتراة!");
+}
+
+function getShopStats(){
+  const list=Object.values(shopItems);
+  const pending=list.filter(i=>!i.bought);
+  const totalCost=list.reduce((s,i)=>s+(i.price||0),0);
+  const pendingCost=pending.reduce((s,i)=>s+(i.price||0),0);
+  return {total:list.length,pending:pending.length,totalCost,pendingCost};
+}
+
+function renderShoppingPage(){
+  const stats=getShopStats();
+  const tn=$("shop-total-num");if(tn)tn.textContent=stats.total;
+  const pn=$("shop-pending-num");if(pn)pn.textContent=stats.pending;
+  const cn=$("shop-cost-num");if(cn)cn.textContent=stats.totalCost.toFixed(stats.totalCost%1===0?0:2);
+
+  const weekStart=getWeekStart();
+  const wl=$("shop-week-label");
+  if(wl)wl.textContent="أسبوع "+weekStart;
+
+  const el=$("shopping-list");if(!el)return;el.innerHTML="";
+  let list=Object.values(shopItems);
+  if(shopFilter==="pending") list=list.filter(i=>!i.bought);
+  else if(shopFilter==="bought") list=list.filter(i=>i.bought);
+
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🛒</div><div>لا توجد أغراض — اضغط + لإضافة</div></div>';
+    return;
+  }
+
+  // تجميع حسب الفئة
+  const cats={};
+  list.forEach(i=>{const cat=i.cat||"📦 أخرى";if(!cats[cat])cats[cat]=[];cats[cat].push(i);});
+
+  Object.entries(cats).forEach(([cat,items])=>{
+    const catDiv=document.createElement("div");catDiv.style.cssText="margin-bottom:16px";
+    const catHeader=document.createElement("div");
+    catHeader.style.cssText="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)";
+    catHeader.textContent=cat;
+    catDiv.appendChild(catHeader);
+
+    items.sort((a,b)=>a.bought===b.bought?0:a.bought?1:-1).forEach(item=>{
+      const row=document.createElement("div");
+      row.style.cssText=`display:flex;align-items:center;gap:10px;padding:11px 14px;background:${item.bought?"#f0fdf4":"var(--card2)"};border-radius:12px;border:1px solid ${item.bought?"#bbf7d0":"var(--border)"};margin-bottom:6px;transition:all .2s`;
+      row.innerHTML=`
+        <button onclick="toggleBought('${item.id}')" style="font-size:20px;background:none;border:none;cursor:pointer;flex-shrink:0;padding:0">${item.bought?"✅":"⬜"}</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text);${item.bought?"text-decoration:line-through;opacity:.5":""}">${esc(item.name)}${item.qty?` <span style="font-size:11px;color:var(--muted);font-weight:400">(${esc(item.qty)})</span>`:""}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:2px;flex-wrap:wrap">
+            ${item.price?`<span style="font-size:11px;color:#d97706;font-weight:700">💰 ${item.price} ريال</span>`:""}
+            ${item.note?`<span style="font-size:11px;color:var(--muted)">📝 ${esc(item.note)}</span>`:""}
+            ${item.addedBy&&item.addedBy!==clientId?`<span style="font-size:10px;background:var(--card3);color:var(--muted);border-radius:6px;padding:1px 6px">👤 ${esc(item.addedBy)}</span>`:""}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button onclick="openShopEdit('${item.id}')" style="background:var(--card3);border:1px solid var(--border2);border-radius:8px;padding:5px 8px;cursor:pointer;font-size:12px">✏️</button>
+          <button onclick="deleteShopItem('${item.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>
+        </div>`;
+      catDiv.appendChild(row);
+    });
+    el.appendChild(catDiv);
+  });
+}
+
+function renderOverviewShoppingList(){
+  const el=$("overview-shopping-list");if(!el)return;
+  const costEl=$("ov-shop-cost");
+  const stats=getShopStats();
+  const pending=Object.values(shopItems).filter(i=>!i.bought);
+
+  if(costEl) costEl.textContent=stats.totalCost>0?`💰 ${stats.totalCost.toFixed(stats.totalCost%1===0?0:2)} ريال إجمالي`:"";
+
+  if(!pending.length){
+    el.innerHTML='<div class="empty-state" style="padding:20px 0"><div class="empty-icon" style="font-size:28px">✅</div><div>تم شراء كل الاحتياجات!</div></div>';
+    return;
+  }
+
+  // جدول مرتب حسب الفئة
+  const cats={};
+  pending.forEach(i=>{const cat=i.cat||"📦 أخرى";if(!cats[cat])cats[cat]=[];cats[cat].push(i);});
+
+  let html='<div style="display:flex;flex-direction:column;gap:10px">';
+  Object.entries(cats).forEach(([cat,items])=>{
+    html+=`<div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px">${cat}</div><div style="display:flex;flex-direction:column;gap:5px">`;
+    items.forEach(item=>{
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card2);border-radius:10px;border:1px solid var(--border)">
+        <span style="font-size:16px">⬜</span>
+        <div style="flex:1">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">${esc(item.name)}</span>
+          ${item.qty?`<span style="font-size:11px;color:var(--muted)"> · ${esc(item.qty)}</span>`:""}
+        </div>
+        ${item.price?`<span style="font-size:11px;font-weight:700;color:#d97706">${item.price} ر</span>`:""}
+        <button onclick="toggleBought('${item.id}')" style="background:var(--grad);color:#fff;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap">تم ✓</button>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+
+  // إجمالي التكلفة المتبقية
+  if(stats.pendingCost>0){
+    html+=`<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #fcd34d">
+      <span style="font-size:13px;font-weight:700;color:#92400e">💰 تكلفة المتبقي</span>
+      <span style="font-size:16px;font-weight:900;color:#d97706">${stats.pendingCost.toFixed(stats.pendingCost%1===0?0:2)} ريال</span>
+    </div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function getWeekStart(){
+  const d=new Date();
+  const day=d.getDay();
+  const diff=d.getDate()-day;
+  const start=new Date(d.setDate(diff));
+  return start.toLocaleDateString("ar-SA");
 }
 
 // ── EDIT MEMBER ──
