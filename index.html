@@ -346,6 +346,19 @@ textarea{resize:none;height:58px;}
         <div><div class="page-title">الشاشة الرئيسية 🏠</div><div class="page-sub" id="today-date"></div></div>
         <div style="display:flex;gap:10px"><button class="btn-grad" onclick="openFreshTaskModal()">＋ مهمة جديدة</button></div>
       </div>
+      <!-- بطاقة المصروفات الشهرية — في الأعلى -->
+      <div class="content-grid wide" style="padding-top:14px;padding-bottom:0">
+        <div class="panel fadeUp" style="animation-delay:.05s;border:2px solid #fcd34d">
+          <div class="panel-head" style="background:linear-gradient(135deg,#fef9e7,#fef3c7)">
+            <div class="panel-title"><div class="panel-dot" style="background:#f59e0b"></div>المصروفات الشهرية 💰</div>
+            <button class="btn-outline" style="font-size:11px;padding:5px 10px;border-color:#f59e0b;color:#d97706" onclick="showPage('shopping')">عرض القائمة</button>
+          </div>
+          <div class="panel-body" id="monthly-report-card">
+            <div style="text-align:center;color:var(--dim);padding:10px;font-size:12px">لا توجد مصاريف مسجلة هذا الشهر</div>
+          </div>
+        </div>
+      </div>
+
       <div class="stats-row">
         <div class="stat-card fadeUp" style="animation-delay:.05s"><div class="stat-stripe" style="background:var(--grad)"></div><div class="stat-icon">⚡</div><div class="stat-num" id="stat-pending" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</div><div class="stat-label">مهام معلقة</div></div>
         <div class="stat-card fadeUp" style="animation-delay:.1s"><div class="stat-stripe" style="background:linear-gradient(90deg,#059669,#34d399)"></div><div class="stat-icon">✅</div><div class="stat-num" id="stat-done" style="color:#059669">0</div><div class="stat-label">مهام مكتملة</div></div>
@@ -749,6 +762,7 @@ textarea{resize:none;height:58px;}
           <button class="task-filter-btn" data-cat="📦 أخرى" onclick="setShopCat(this,'📦 أخرى')">📦 أخرى</button>
         </div>
       </div>
+      <div><div class="field-label">التاريخ</div><input type="date" id="shop-date"/></div>
       <div><div class="field-label">ملاحظة</div><input type="text" id="shop-note" placeholder="أي تفاصيل إضافية..."/></div>
     </div>
     <input type="hidden" id="shop-edit-id"/>
@@ -952,7 +966,7 @@ function doLogin(){
   });
 }
 
-function doLogout(){localStorage.removeItem("fam_session");db.ref("clients/"+clientId).off();location.href=location.pathname;}
+function doLogout(){localStorage.removeItem("fam_session");if(clientId){db.ref("clients/"+clientId).off();}shopItems={};clientId=null;location.href=location.pathname;}
 
 function startApp(id){
   clientId=id;
@@ -971,7 +985,7 @@ function startApp(id){
   db.ref("clients/"+clientId+"/stars").on("value",snap=>{stars=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/members").on("value",snap=>{members=snap.val()||{};renderAll();});
   db.ref("clients/"+clientId+"/slotsDone").on("value",snap=>{slotsDone=snap.val()||{};renderAll();});
-  db.ref("clients/"+clientId+"/shopping").on("value",snap=>{shopItems=snap.val()||{};renderAll();});
+  db.ref("clients/"+clientId+"/shopping").on("value",snap=>{shopItems=snap.val()||{};renderShoppingPage();renderOverviewShoppingList();renderMonthlyReport();renderStats();});
   startMaidListeners();
   startChildRewardListener();
 }
@@ -1009,8 +1023,9 @@ document.addEventListener("click",e=>{if(e.target.classList.contains("overlay"))
 function renderAll(){
   renderStats();renderDonut();renderBars();renderChildrenStars();
   renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
-  renderMembersOverview();
-  renderMaidOverviewCard();
+  renderMembersOverview();renderMaidOverviewCard();
+  renderShoppingPage();renderOverviewShoppingList();renderMonthlyReport();
+  updateNotifBadge();
   if(isAdminUser&&isAdminUser()) renderAdminPage();
 }
 
@@ -1944,89 +1959,131 @@ function setShopFilter(f){
 function setShopCat(btn,cat){
   shopCat=cat;
   document.querySelectorAll("[data-cat]").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+  if(btn) btn.classList.add("active");
 }
 
 function openShopAdd(){
   shopEditId=null;
-  ["shop-name","shop-qty","shop-note"].forEach(id=>{const el=$(id);if(el)el.value="";});
-  const sp=$("shop-price");if(sp)sp.value="";
-  shopCat="🥩 لحوم";
-  document.querySelectorAll("[data-cat]").forEach(b=>b.classList.toggle("active",b.dataset.cat==="🥩 لحوم"));
-  const t=$("shop-modal-title");if(t)t.textContent="🛒 إضافة غرض";
-  const sb=$("shop-save-btn");if(sb)sb.textContent="💾 إضافة للقائمة";
+  $("shop-name").value="";
+  $("shop-qty").value="";
+  $("shop-price").value="";
+  $("shop-note").value="";
+  $("shop-date").value=getTodayStr();
+  shopCat="📦 أخرى";
+  document.querySelectorAll("[data-cat]").forEach(b=>b.classList.toggle("active",b.dataset.cat==="📦 أخرى"));
+  $("shop-modal-title").textContent="🛒 إضافة غرض";
+  $("shop-save-btn").textContent="💾 إضافة للقائمة";
   openModal("shopping-modal");
 }
 
 function openShopEdit(id){
   const item=shopItems[id];if(!item)return;
   shopEditId=id;
-  const n=$(shop-name);if(n)n.value=item.name||"";
-  const q=$(shop-qty);if(q)q.value=item.qty||"";
-  const p=$(shop-price);if(p)p.value=item.price||"";
-  const no=$(shop-note);if(no)no.value=item.note||"";
+  $("shop-name").value=item.name||"";
+  $("shop-qty").value=item.qty||"";
+  $("shop-price").value=item.price||"";
+  $("shop-note").value=item.note||"";
+  $("shop-date").value=item.date||getTodayStr();
   shopCat=item.cat||"📦 أخرى";
   document.querySelectorAll("[data-cat]").forEach(b=>b.classList.toggle("active",b.dataset.cat===shopCat));
-  const t=$("shop-modal-title");if(t)t.textContent="✏️ تعديل الغرض";
-  const sb=$("shop-save-btn");if(sb)sb.textContent="💾 حفظ التعديل";
+  $("shop-modal-title").textContent="✏️ تعديل الغرض";
+  $("shop-save-btn").textContent="💾 حفظ التعديل";
   openModal("shopping-modal");
 }
 
 function saveShopItem(){
   const name=$("shop-name").value.trim();
   if(!name){$("shop-name").focus();return;}
-  const data={
-    name,
-    qty:$("shop-qty").value.trim(),
-    price:parseFloat($("shop-price").value)||0,
-    note:$("shop-note").value.trim(),
-    cat:shopCat,
-    bought:false,
-    addedBy:clientId,
-    createdAt:Date.now()
-  };
+  const price=parseFloat($("shop-price").value)||0;
+  const date=$("shop-date").value||getTodayStr();
+  const data={name,qty:$("shop-qty").value.trim(),price,note:$("shop-note").value.trim(),cat:shopCat,bought:false,addedBy:clientId,date,createdAt:Date.now()};
   setSync("syncing","جاري الحفظ...");
   if(shopEditId){
-    // تعديل — احتفظ بحالة الشراء
     data.bought=shopItems[shopEditId].bought||false;
-    db.ref("clients/"+clientId+"/shopping/"+shopEditId).set({...data,id:shopEditId});
-    toast("✅ تم تعديل الغرض!");
+    data.id=shopEditId;
+    db.ref("clients/"+clientId+"/shopping/"+shopEditId).set(data)
+      .then(()=>{toast("✅ تم تعديل الغرض!");shopEditId=null;closeModal("shopping-modal");})
+      .catch(e=>toast("❌ خطأ: "+e.message));
   } else {
-    const id=uid();
-    data.id=id;
-    db.ref("clients/"+clientId+"/shopping/"+id).set(data);
-    toast("🛒 تمت إضافة "+name+" للقائمة!");
+    const id=uid();data.id=id;
+    db.ref("clients/"+clientId+"/shopping/"+id).set(data)
+      .then(()=>{toast("🛒 تمت إضافة "+name+"!");closeModal("shopping-modal");})
+      .catch(e=>toast("❌ خطأ: "+e.message));
   }
-  shopEditId=null;
-  closeModal("shopping-modal");
 }
 
 function toggleBought(id){
   const item=shopItems[id];if(!item)return;
   setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/shopping/"+id).update({bought:!item.bought});
+  db.ref("clients/"+clientId+"/shopping/"+id).update({bought:!item.bought})
+    .catch(e=>toast("❌ خطأ: "+e.message));
 }
 
 function deleteShopItem(id){
   setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/shopping/"+id).remove();
+  db.ref("clients/"+clientId+"/shopping/"+id).remove()
+    .catch(e=>toast("❌ خطأ: "+e.message));
 }
 
 function clearBoughtItems(){
   if(!confirm("حذف جميع الأغراض المشتراة؟"))return;
   setSync("syncing","جاري الحفظ...");
-  Object.values(shopItems).filter(i=>i.bought).forEach(i=>{
-    db.ref("clients/"+clientId+"/shopping/"+i.id).remove();
-  });
-  toast("🗑 تم حذف الأغراض المشتراة!");
+  const promises=Object.values(shopItems).filter(i=>i.bought).map(i=>db.ref("clients/"+clientId+"/shopping/"+i.id).remove());
+  Promise.all(promises).then(()=>toast("🗑 تم حذف الأغراض المشتراة!")).catch(e=>toast("❌ خطأ: "+e.message));
 }
 
 function getShopStats(){
   const list=Object.values(shopItems);
   const pending=list.filter(i=>!i.bought);
-  const totalCost=list.reduce((s,i)=>s+(i.price||0),0);
-  const pendingCost=pending.reduce((s,i)=>s+(i.price||0),0);
+  const totalCost=list.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const pendingCost=pending.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
   return {total:list.length,pending:pending.length,totalCost,pendingCost};
+}
+
+function getMonthlySpend(){
+  const now=new Date();
+  const month=now.getMonth();
+  const year=now.getFullYear();
+  const list=Object.values(shopItems);
+  const thisMonth=list.filter(i=>{
+    if(!i.date)return false;
+    const d=new Date(i.date);
+    return d.getMonth()===month&&d.getFullYear()===year;
+  });
+  const spent=thisMonth.filter(i=>i.bought).reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const planned=thisMonth.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const cats={};
+  thisMonth.filter(i=>i.bought&&i.price).forEach(i=>{const cat=i.cat||"📦 أخرى";cats[cat]=(cats[cat]||0)+(parseFloat(i.price)||0);});
+  return {spent,planned,count:thisMonth.length,boughtCount:thisMonth.filter(i=>i.bought).length,cats,month:now.toLocaleDateString("ar-SA",{month:"long",year:"numeric"})};
+}
+
+function renderMonthlyReport(){
+  const el=$("monthly-report-card");if(!el)return;
+  const r=getMonthlySpend();
+  if(r.spent===0&&r.planned===0){
+    el.innerHTML='<div style="text-align:center;color:var(--dim);padding:10px;font-size:12px">لا توجد مصاريف مسجلة هذا الشهر</div>';
+    return;
+  }
+  const pct=r.planned>0?Math.round(r.spent/r.planned*100):0;
+  const topCats=Object.entries(r.cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div style="font-size:22px;font-weight:900;color:#d97706">${r.spent.toFixed(r.spent%1===0?0:2)} <span style="font-size:13px;color:var(--muted)">ريال</span></div>
+        <div style="font-size:11px;color:var(--muted)">تم صرفه · ${r.boughtCount} غرض</div>
+      </div>
+      ${r.planned>0?`<div style="text-align:center;background:var(--card2);border-radius:12px;padding:8px 14px">
+        <div style="font-size:16px;font-weight:900;color:var(--grad-start)">${pct}%</div>
+        <div style="font-size:10px;color:var(--muted)">من ${r.planned.toFixed(0)} ر</div>
+      </div>`:""}
+    </div>
+    ${r.planned>0?`<div style="background:#f0eaff;border-radius:6px;height:8px;overflow:hidden;margin-bottom:12px">
+      <div style="height:100%;width:${Math.min(pct,100)}%;background:var(--grad);border-radius:6px;transition:width .6s ease"></div>
+    </div>`:""}
+    ${topCats.length?`<div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${topCats.map(([cat,amt])=>`<span style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--text2)">${cat} <strong style="color:#d97706">${amt.toFixed(0)}ر</strong></span>`).join("")}
+    </div>`:""}
+  `;
 }
 
 function renderShoppingPage(){
@@ -2034,48 +2091,40 @@ function renderShoppingPage(){
   const tn=$("shop-total-num");if(tn)tn.textContent=stats.total;
   const pn=$("shop-pending-num");if(pn)pn.textContent=stats.pending;
   const cn=$("shop-cost-num");if(cn)cn.textContent=stats.totalCost.toFixed(stats.totalCost%1===0?0:2);
-
-  const weekStart=getWeekStart();
-  const wl=$("shop-week-label");
-  if(wl)wl.textContent="أسبوع "+weekStart;
-
+  const wl=$("shop-week-label");if(wl)wl.textContent="أسبوع "+getWeekStart();
   const el=$("shopping-list");if(!el)return;el.innerHTML="";
+  // تحديث أزرار الفلتر
+  document.querySelectorAll("[data-sf]").forEach(b=>b.classList.toggle("active",b.dataset.sf===shopFilter));
   let list=Object.values(shopItems);
   if(shopFilter==="pending") list=list.filter(i=>!i.bought);
   else if(shopFilter==="bought") list=list.filter(i=>i.bought);
-
   if(!list.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-icon">🛒</div><div>لا توجد أغراض — اضغط + لإضافة</div></div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🛒</div><div>'+
+    (shopFilter==="all"?"لا توجد أغراض — اضغط + لإضافة":shopFilter==="pending"?"لا توجد أغراض متبقية ✅":"لا توجد أغراض مشتراة")+
+    '</div></div>';
     return;
   }
-
-  // تجميع حسب الفئة
   const cats={};
   list.forEach(i=>{const cat=i.cat||"📦 أخرى";if(!cats[cat])cats[cat]=[];cats[cat].push(i);});
-
   Object.entries(cats).forEach(([cat,items])=>{
-    const catDiv=document.createElement("div");catDiv.style.cssText="margin-bottom:16px";
-    const catHeader=document.createElement("div");
-    catHeader.style.cssText="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)";
-    catHeader.textContent=cat;
-    catDiv.appendChild(catHeader);
-
+    const catDiv=document.createElement("div");catDiv.style.marginBottom="14px";
+    catDiv.innerHTML=`<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">${cat}</div>`;
     items.sort((a,b)=>a.bought===b.bought?0:a.bought?1:-1).forEach(item=>{
       const row=document.createElement("div");
-      row.style.cssText=`display:flex;align-items:center;gap:10px;padding:11px 14px;background:${item.bought?"#f0fdf4":"var(--card2)"};border-radius:12px;border:1px solid ${item.bought?"#bbf7d0":"var(--border)"};margin-bottom:6px;transition:all .2s`;
+      row.style.cssText=`display:flex;align-items:center;gap:10px;padding:10px 12px;background:${item.bought?"#f0fdf4":"var(--card2)"};border-radius:11px;border:1px solid ${item.bought?"#bbf7d0":"var(--border)"};margin-bottom:6px`;
       row.innerHTML=`
-        <button onclick="toggleBought('${item.id}')" style="font-size:20px;background:none;border:none;cursor:pointer;flex-shrink:0;padding:0">${item.bought?"✅":"⬜"}</button>
+        <button onclick="toggleBought('${item.id}')" style="font-size:19px;background:none;border:none;cursor:pointer;flex-shrink:0;padding:0">${item.bought?"✅":"⬜"}</button>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--text);${item.bought?"text-decoration:line-through;opacity:.5":""}">${esc(item.name)}${item.qty?` <span style="font-size:11px;color:var(--muted);font-weight:400">(${esc(item.qty)})</span>`:""}</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:2px;flex-wrap:wrap">
+          <div style="font-size:13px;font-weight:700;color:var(--text);${item.bought?"text-decoration:line-through;opacity:.5":""}">${esc(item.name)}${item.qty?` <span style="font-size:11px;color:var(--muted)">(${esc(item.qty)})</span>`:""}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
             ${item.price?`<span style="font-size:11px;color:#d97706;font-weight:700">💰 ${item.price} ريال</span>`:""}
-            ${item.note?`<span style="font-size:11px;color:var(--muted)">📝 ${esc(item.note)}</span>`:""}
-            ${item.addedBy&&item.addedBy!==clientId?`<span style="font-size:10px;background:var(--card3);color:var(--muted);border-radius:6px;padding:1px 6px">👤 ${esc(item.addedBy)}</span>`:""}
+            ${item.date?`<span style="font-size:10px;color:var(--dim)">📅 ${item.date}</span>`:""}
+            ${item.note?`<span style="font-size:11px;color:var(--muted)">· ${esc(item.note)}</span>`:""}
           </div>
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
-          <button onclick="openShopEdit('${item.id}')" style="background:var(--card3);border:1px solid var(--border2);border-radius:8px;padding:5px 8px;cursor:pointer;font-size:12px">✏️</button>
-          <button onclick="deleteShopItem('${item.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444">🗑</button>
+          <button onclick="openShopEdit('${item.id}')" style="background:var(--card3);border:1px solid var(--border2);border-radius:7px;padding:5px 8px;cursor:pointer;font-size:11px">✏️</button>
+          <button onclick="deleteShopItem('${item.id}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;padding:5px 8px;cursor:pointer;font-size:11px;color:#ef4444">🗑</button>
         </div>`;
       catDiv.appendChild(row);
     });
@@ -2087,54 +2136,34 @@ function renderOverviewShoppingList(){
   const el=$("overview-shopping-list");if(!el)return;
   const costEl=$("ov-shop-cost");
   const stats=getShopStats();
+  if(costEl) costEl.textContent=stats.pendingCost>0?`💰 ${stats.pendingCost.toFixed(stats.pendingCost%1===0?0:2)} ريال متبقي`:"";
   const pending=Object.values(shopItems).filter(i=>!i.bought);
-
-  if(costEl) costEl.textContent=stats.totalCost>0?`💰 ${stats.totalCost.toFixed(stats.totalCost%1===0?0:2)} ريال إجمالي`:"";
-
-  if(!pending.length){
-    el.innerHTML='<div class="empty-state" style="padding:20px 0"><div class="empty-icon" style="font-size:28px">✅</div><div>تم شراء كل الاحتياجات!</div></div>';
-    return;
-  }
-
-  // جدول مرتب حسب الفئة
+  if(!pending.length){el.innerHTML='<div class="empty-state" style="padding:14px 0"><div style="font-size:24px">✅</div><div>تم شراء كل الاحتياجات!</div></div>';return;}
   const cats={};
   pending.forEach(i=>{const cat=i.cat||"📦 أخرى";if(!cats[cat])cats[cat]=[];cats[cat].push(i);});
-
-  let html='<div style="display:flex;flex-direction:column;gap:10px">';
+  let html='<div style="display:flex;flex-direction:column;gap:8px">';
   Object.entries(cats).forEach(([cat,items])=>{
-    html+=`<div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px">${cat}</div><div style="display:flex;flex-direction:column;gap:5px">`;
+    html+=`<div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px">${cat}</div><div style="display:flex;flex-direction:column;gap:4px">`;
     items.forEach(item=>{
       html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card2);border-radius:10px;border:1px solid var(--border)">
-        <span style="font-size:16px">⬜</span>
-        <div style="flex:1">
-          <span style="font-size:13px;font-weight:600;color:var(--text)">${esc(item.name)}</span>
-          ${item.qty?`<span style="font-size:11px;color:var(--muted)"> · ${esc(item.qty)}</span>`:""}
-        </div>
-        ${item.price?`<span style="font-size:11px;font-weight:700;color:#d97706">${item.price} ر</span>`:""}
-        <button onclick="toggleBought('${item.id}')" style="background:var(--grad);color:#fff;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap">تم ✓</button>
+        <span style="font-size:15px">⬜</span>
+        <div style="flex:1"><span style="font-size:12px;font-weight:600;color:var(--text)">${esc(item.name)}</span>${item.qty?`<span style="font-size:11px;color:var(--muted)"> · ${esc(item.qty)}</span>`:""}</div>
+        ${item.price?`<span style="font-size:11px;font-weight:700;color:#d97706">${item.price}ر</span>`:""}
+        <button onclick="toggleBought('${item.id}')" style="background:var(--grad);color:#fff;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700">تم ✓</button>
       </div>`;
     });
     html+='</div></div>';
   });
-
-  // إجمالي التكلفة المتبقية
-  if(stats.pendingCost>0){
-    html+=`<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #fcd34d">
-      <span style="font-size:13px;font-weight:700;color:#92400e">💰 تكلفة المتبقي</span>
-      <span style="font-size:16px;font-weight:900;color:#d97706">${stats.pendingCost.toFixed(stats.pendingCost%1===0?0:2)} ريال</span>
-    </div>`;
-  }
+  if(stats.pendingCost>0) html+=`<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #fcd34d"><span style="font-size:12px;font-weight:700;color:#92400e">💰 إجمالي المتبقي</span><span style="font-size:15px;font-weight:900;color:#d97706">${stats.pendingCost.toFixed(stats.pendingCost%1===0?0:2)} ريال</span></div>`;
   html+='</div>';
   el.innerHTML=html;
 }
 
 function getWeekStart(){
-  const d=new Date();
-  const day=d.getDay();
-  const diff=d.getDate()-day;
-  const start=new Date(d.setDate(diff));
-  return start.toLocaleDateString("ar-SA");
+  const d=new Date();const day=d.getDay();const diff=d.getDate()-day;
+  const start=new Date(d.setDate(diff));return start.toLocaleDateString("ar-SA");
 }
+
 
 // ── EDIT MEMBER ──
 let editMemberSelColor = COLORS[0];
