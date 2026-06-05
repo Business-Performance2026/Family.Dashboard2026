@@ -13,7 +13,6 @@
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 :root{
   --grad:linear-gradient(135deg,#5B247A,#1BCEDF);
@@ -775,7 +774,6 @@ textarea{resize:none;height:58px;}
 const firebaseConfig={apiKey:"AIzaSyAROFo8m5M2ETnVFWh86GkaMxThDV9S8fY",authDomain:"family-dashboard-e979a.firebaseapp.com",databaseURL:"https://family-dashboard-e979a-default-rtdb.firebaseio.com",projectId:"family-dashboard-e979a",storageBucket:"family-dashboard-e979a.firebasestorage.app",messagingSenderId:"945587305724",appId:"1:945587305724:web:647608b0676e3aa6a92b79"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
-const storage=firebase.storage();
 
 const DAYS_AR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const DAYS_SHORT=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
@@ -1780,29 +1778,46 @@ async function uploadPhoto(type, entityId, folder){
   const pending=pendingPhotos[type];
   if(!pending) return null;
   try{
-    const ext=pending.file.name.split(".").pop()||"jpg";
-    const ref=storage.ref("clients/"+clientId+"/"+folder+"/"+entityId+"."+ext);
-    await ref.put(pending.file);
-    const url=await ref.getDownloadURL();
+    // ضغط الصورة وتحويلها لـ Base64
+    const compressed=await compressImage(pending.file, 200);
     delete pendingPhotos[type];
-    return url;
+    return compressed;
   } catch(e){
-    console.error("Upload error:",e);
-    toast("⚠️ فشل رفع الصورة - سيتم الحفظ بدون صورة");
+    console.error("Photo error:",e);
+    toast("⚠️ فشل في معالجة الصورة");
     return null;
   }
 }
 
-async function deletePhoto(folder, entityId){
-  try{
-    // Try to delete all common extensions
-    for(const ext of ["jpg","jpeg","png","webp"]){
-      try{
-        await storage.ref("clients/"+clientId+"/"+folder+"/"+entityId+"."+ext).delete();
-        break;
-      } catch(e){}
-    }
-  } catch(e){}
+function compressImage(file, maxSize){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement("canvas");
+        let w=img.width,h=img.height;
+        // ضغط لحجم أصغر
+        if(w>maxSize||h>maxSize){
+          if(w>h){h=Math.round(h*maxSize/w);w=maxSize;}
+          else{w=Math.round(w*maxSize/h);h=maxSize;}
+        }
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",0.7));
+      };
+      img.onerror=reject;
+      img.src=e.target.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function deletePhoto(folder, entityId){
+  // Base64 — الصورة محفوظة في Database مع البيانات
+  // الحذف يتم تلقائياً مع حذف السجل
 }
 
 function showPhotoInEditModal(type, currentUrl){
