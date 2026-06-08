@@ -268,6 +268,17 @@ textarea{resize:none;height:58px;}
 <body>
 <div id="toast"></div>
 
+<!-- شاشة الإيقاف -->
+<div id="blocked-screen" class="auth-screen hidden">
+  <div class="auth-box" style="border-top:5px solid #ef4444">
+    <div class="auth-logo">🔒</div>
+    <div class="auth-title" style="background:linear-gradient(135deg,#ef4444,#dc2626);-webkit-background-clip:text;-webkit-text-fill-color:transparent">تم إيقاف الحساب</div>
+    <div id="blocked-message" style="color:var(--text);font-size:15px;line-height:2;margin:16px 0;padding:16px;background:var(--card2);border-radius:14px;border:1px solid var(--border)">الرجاء التواصل مع المسؤول</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px" id="blocked-username"></div>
+    <button class="auth-btn" style="background:linear-gradient(135deg,#6b7280,#4b5563);margin-top:16px" onclick="doLogout()">🚪 تسجيل الخروج</button>
+  </div>
+</div>
+
 <!-- شاشة التسجيل -->
 <div id="register-screen" class="auth-screen hidden">
   <div class="auth-box">
@@ -605,12 +616,27 @@ textarea{resize:none;height:58px;}
     <!-- ADMIN PAGE -->
     <div id="page-admin" class="hidden">
       <div class="page-header">
-        <div><div class="page-title">لوحة الإدارة 🛡️</div><div class="page-sub">إدارة كودات الدعوة والمستخدمين</div></div>
+        <div><div class="page-title">لوحة الإدارة 🛡️</div><div class="page-sub">إدارة المستخدمين وكودات الدعوة</div></div>
         <div style="display:flex;gap:10px">
           <button class="btn-grad" onclick="generateCodes(10)">＋ توليد 10 كودات</button>
           <button class="btn-grad" onclick="generateCodes(50)" style="background:linear-gradient(135deg,#059669,#34d399)">＋ 50 كود</button>
         </div>
       </div>
+
+      <!-- إدارة المستخدمين -->
+      <div class="content-grid wide" style="padding-bottom:0">
+        <div class="panel fadeUp">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot" style="background:#ef4444"></div>إدارة المستخدمين 👥</div>
+            <span id="users-count" style="font-size:12px;color:var(--muted)"></span>
+          </div>
+          <div class="panel-body">
+            <div id="users-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- الكودات -->
       <div class="content-grid" style="padding-bottom:28px">
         <div class="panel fadeUp">
           <div class="panel-head">
@@ -618,7 +644,7 @@ textarea{resize:none;height:58px;}
             <span id="codes-available-count" style="font-size:12px;color:var(--muted)">0 كود</span>
           </div>
           <div class="panel-body">
-            <div id="codes-available-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
+            <div id="codes-available-list" style="display:flex;flex-direction:column;gap:8px;max-height:350px;overflow-y:auto"></div>
           </div>
         </div>
         <div class="panel fadeUp">
@@ -627,7 +653,7 @@ textarea{resize:none;height:58px;}
             <span id="codes-used-count" style="font-size:12px;color:var(--muted)">0 كود</span>
           </div>
           <div class="panel-body">
-            <div id="codes-used-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
+            <div id="codes-used-list" style="display:flex;flex-direction:column;gap:8px;max-height:350px;overflow-y:auto"></div>
           </div>
         </div>
       </div>
@@ -729,6 +755,22 @@ textarea{resize:none;height:58px;}
     <button class="save-btn" style="margin-top:14px" onclick="addChild()">💾 إضافة الطفل</button>
   </div>
 </div>
+<!-- إيقاف مستخدم -->
+<div id="block-user-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">🔒 إيقاف مستخدم <button class="modal-close" onclick="closeModal('block-user-modal')">✕</button></div>
+    <div class="form-col">
+      <div id="block-user-name" style="font-size:14px;font-weight:700;color:var(--text);padding:10px;background:var(--card2);border-radius:10px;border:1px solid var(--border)"></div>
+      <div>
+        <div class="field-label">الرسالة التي ستظهر للمستخدم *</div>
+        <textarea id="block-message" placeholder="مثال: الرجاء تجديد الاشتراك للاستمرار..." style="height:100px"></textarea>
+      </div>
+    </div>
+    <input type="hidden" id="block-user-id"/>
+    <button class="save-btn" style="margin-top:14px;background:linear-gradient(135deg,#ef4444,#dc2626)" onclick="confirmBlockUser()">🔒 إيقاف الحساب</button>
+  </div>
+</div>
+
 <!-- إضافة غرض -->
 <div id="shopping-modal" class="overlay hidden">
   <div class="modal">
@@ -949,7 +991,10 @@ function doLogin(){
     if(user.pass!==hashPass(pass)){errEl.textContent="كلمة السر خاطئة";errEl.classList.add("show");return;}
     localStorage.setItem("fam_session",uid2);
     $("login-name").value="";$("login-pass").value="";
-    startApp(uid2);toast("🎉 مرحباً بعودتك!");
+    // تحقق من حالة الحساب قبل الدخول
+    checkUserStatus(uid2).then(active=>{
+      if(active){ startApp(uid2);toast("🎉 مرحباً بعودتك!"); }
+    });
   });
 }
 
@@ -957,6 +1002,18 @@ function doLogout(){localStorage.removeItem("fam_session");if(clientId){db.ref("
 
 function startApp(id){
   clientId=id;
+  // تحقق من حالة الحساب عند كل فتح (حتى من localStorage)
+  if(id!==ADMIN_USER){
+    checkUserStatus(id).then(active=>{
+      if(!active) return; // blocked — شاشة الإيقاف ظهرت
+      _initApp(id);
+    });
+    return;
+  }
+  _initApp(id);
+}
+
+function _initApp(id){
   $("login-screen").classList.add("hidden");$("register-screen").classList.add("hidden");$("app").classList.remove("hidden");
   $("sidebar-name").textContent=id;document.title="لوحة "+id+" 🏠";
   // إظهار قسم الإدارة للمدير فقط
@@ -1420,6 +1477,98 @@ function applyDP(b,i){const a=i===selDay;b.style.background=a?"linear-gradient(1
 function buildQuickSubj(){const qs=$("quick-subj");if(!qs)return;qs.innerHTML="";Object.entries(SI).forEach(([s,icon])=>{const b=document.createElement("button");b.className="subj-btn";b.textContent=icon+" "+s;b.onclick=()=>{$("sf-subject").value=s;};qs.appendChild(b);});}
 function scheduleNotifs(){Object.values(notifTimers).forEach(clearTimeout);notifTimers={};Object.values(tasks).forEach(t=>{if(t.done||!t.date||!t.time)return;const diff=new Date(t.date+"T"+t.time).getTime()-Date.now()-300000;if(diff>0)notifTimers[t.id]=setTimeout(()=>{if(typeof Notification!=="undefined"&&Notification.permission==="granted")new Notification("⏰ "+t.title,{body:"بعد 5 دقائق!"});toast("⏰ "+t.title+" — بعد 5 دقائق!");},diff);});}
 function addSlot(){if(!activeChild)return;const from=$("sf-from").value,to=$("sf-to").value,subject=$("sf-subject").value.trim();if(!from||!to||!subject){toast("⚠️ يرجى تعبئة الوقت والنشاط");return;}const id=uid();setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+activeChild+"/"+id).set({id,day:selDay,from,to,subject});$("sf-from").value="";$("sf-to").value="";$("sf-subject").value="";closeModal("slot-modal");toast("📅 تمت إضافة النشاط!");}
+
+// ── USER MANAGEMENT ──
+function checkUserStatus(userId){
+  return db.ref("users/"+userId+"/status").once("value").then(snap=>{
+    const status=snap.val();
+    if(status&&status.blocked){
+      // أوقف التطبيق وأظهر شاشة الإيقاف
+      $("app").classList.add("hidden");
+      $("login-screen").classList.add("hidden");
+      $("blocked-screen").classList.remove("hidden");
+      const msg=$("blocked-message");
+      if(msg) msg.textContent=status.message||"تم إيقاف هذا الحساب. الرجاء التواصل مع المسؤول.";
+      const un=$("blocked-username");
+      if(un) un.textContent="الحساب: "+userId;
+      return false; // blocked
+    }
+    return true; // active
+  });
+}
+
+function openBlockModal(userId){
+  $("block-user-id").value=userId;
+  $("block-user-name").textContent="👤 "+userId;
+  $("block-message").value="";
+  openModal("block-user-modal");
+}
+
+function confirmBlockUser(){
+  const userId=$("block-user-id").value;
+  const message=($("block-message").value||"").trim();
+  if(!message){$("block-message").focus();toast("⚠️ اكتب رسالة للمستخدم أولاً");return;}
+  setSync("syncing","جاري الحفظ...");
+  db.ref("users/"+userId+"/status").set({blocked:true,message,blockedAt:Date.now(),blockedBy:clientId})
+    .then(()=>{
+      closeModal("block-user-modal");
+      toast("🔒 تم إيقاف حساب "+userId);
+      renderAdminPage();
+    }).catch(e=>toast("❌ خطأ: "+e.message));
+}
+
+function unblockUser(userId){
+  if(!confirm("رفع الإيقاف عن "+userId+"؟"))return;
+  setSync("syncing","جاري الحفظ...");
+  db.ref("users/"+userId+"/status").remove()
+    .then(()=>{
+      toast("✅ تم رفع الإيقاف عن "+userId);
+      renderAdminPage();
+    }).catch(e=>toast("❌ خطأ: "+e.message));
+}
+
+function renderUsersInAdmin(){
+  const el=$("users-list");if(!el)return;
+  db.ref("users").once("value",snap=>{
+    const users=snap.val()||{};
+    const list=Object.values(users).filter(u=>u.name!==ADMIN_USER);
+    const countEl=$("users-count");
+    if(countEl) countEl.textContent=list.length+" مستخدم";
+    el.innerHTML="";
+    if(!list.length){
+      el.innerHTML='<div class="empty-state" style="padding:20px 0"><div>لا يوجد مستخدمون مسجلون بعد</div></div>';
+      return;
+    }
+    list.forEach(u=>{
+      const blocked=u.status&&u.status.blocked;
+      const row=document.createElement("div");
+      row.style.cssText=`display:flex;align-items:center;gap:12px;padding:12px 14px;background:${blocked?"#fff5f5":"var(--card2)"};border-radius:12px;border:1px solid ${blocked?"#fca5a5":"var(--border)"};transition:all .2s`;
+      const date=u.created?new Date(u.created).toLocaleDateString("ar-SA"):"";
+      const code=u.inviteCode?`<span style="font-size:10px;background:var(--card3);border-radius:6px;padding:1px 7px;color:var(--muted)">${u.inviteCode}</span>`:"";
+      row.innerHTML=`
+        <div style="width:38px;height:38px;border-radius:50%;background:${blocked?"#ef4444":"var(--grad)"};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0">${(u.name||"?").charAt(0).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:14px;font-weight:700;color:var(--text)">${esc(u.name||"")}</span>
+            ${code}
+            ${blocked?`<span style="background:#fee2e2;color:#ef4444;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700">🔒 موقوف</span>`:`<span style="background:#dcfce7;color:#059669;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700">✅ نشط</span>`}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">
+            📅 انضم: ${date}
+            ${blocked&&u.status.message?`<br/>📢 رسالة: ${esc(u.status.message)}`:""}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${blocked
+            ?`<button onclick="unblockUser('${u.name}')" style="background:#dcfce7;border:1px solid #86efac;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:12px;color:#059669;font-weight:700">🔓 رفع الإيقاف</button>`
+            :`<button onclick="openBlockModal('${u.name}')" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:12px;color:#ef4444;font-weight:700">🔒 إيقاف</button>`
+          }
+        </div>`;
+      el.appendChild(row);
+    });
+  });
+}
+
 // ── ADMIN PAGE RENDER ──
 
 function generateCodes(count){
@@ -2418,6 +2567,14 @@ function updateNotifBadge(){
 
 // تحديث الإشعارات كل دقيقة
 setInterval(updateNotifBadge, 60000);
+// تحقق من حالة الحساب كل 5 دقائق
+setInterval(()=>{
+  if(clientId&&clientId!==ADMIN_USER){
+    checkUserStatus(clientId).then(active=>{
+      if(!active) toast("🔒 تم إيقاف حسابك");
+    });
+  }
+}, 300000);
 
 function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
 </script>
