@@ -252,11 +252,12 @@ textarea{resize:none;height:58px;}
 .members-strip-wrap{overflow:hidden;padding:14px 0 4px;position:relative;}
 .members-strip-wrap::before{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to left,#f3eeff,transparent);z-index:2;pointer-events:none;}
 .members-strip-wrap::after{content:'';position:absolute;top:0;left:0;bottom:0;width:40px;background:linear-gradient(to right,#f3eeff,transparent);z-index:2;pointer-events:none;}
-.members-strip{display:flex;gap:14px;padding:4px 20px;animation:scrollStrip 20s linear infinite;width:max-content;}
-.members-strip:hover{animation-play-state:paused;}
+.members-strip-outer{display:flex;gap:14px;padding:4px 0;animation:scrollStrip 20s linear infinite;width:max-content;}
+.members-strip-outer:hover{animation-play-state:paused;}
+.members-strip{display:flex;gap:14px;padding:4px 20px;width:max-content;}
 @keyframes scrollStrip{
   0%{transform:translateX(0);}
-  100%{transform:translateX(-50%);}
+  100%{transform:translateX(calc(-50% - 7px));}
 }
 .member-card-strip{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .2s;}
 .member-card-strip:hover{transform:translateY(-4px);}
@@ -454,7 +455,11 @@ textarea{resize:none;height:58px;}
       </div>
       <!-- شريط أفراد العائلة -->
       <div class="members-strip-wrap" id="members-strip-section">
-        <div class="members-strip" id="members-strip"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 20px 6px">
+          <span style="font-size:12px;font-weight:700;color:var(--muted)">👨‍👩‍👧‍👦 أفراد العائلة</span>
+          <button onclick="openModal('strip-person-modal')" style="background:var(--grad);color:#fff;border:none;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit">＋ إضافة</button>
+        </div>
+        <div class="members-strip-outer" id="members-strip-outer"><div class="members-strip" id="members-strip"></div><div class="members-strip" id="members-strip-clone" aria-hidden="true"></div></div>
       </div>
 
       <div class="stats-row">
@@ -890,6 +895,27 @@ textarea{resize:none;height:58px;}
     <button class="save-btn" style="margin-top:14px" onclick="addChild()">💾 إضافة الطفل</button>
   </div>
 </div>
+<!-- إضافة شخص للشريط -->
+<div id="strip-person-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">👤 إضافة شخص للشريط <button class="modal-close" onclick="closeModal('strip-person-modal')">✕</button></div>
+    <div class="form-col">
+      <div style="text-align:center">
+        <div class="field-label" style="text-align:right">الصورة (اختياري)</div>
+        <div class="photo-upload-wrap" onclick="triggerPhotoUpload('strip-photo-input')">
+          <img id="strip-photo-preview" class="photo-preview"/>
+          <div id="strip-photo-placeholder" class="photo-placeholder">📷<div style="font-size:10px;color:var(--muted);margin-top:2px">إضافة صورة</div></div>
+          <button class="photo-del-btn" id="strip-photo-del" onclick="event.stopPropagation();removePhoto('strip')">✕</button>
+        </div>
+        <input type="file" id="strip-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'strip')"/>
+      </div>
+      <div><div class="field-label">الاسم *</div><input type="text" id="strip-person-name" placeholder="اسم الشخص"/></div>
+      <div><div class="field-label">اللون</div><div class="color-row" id="strip-color-picker"></div></div>
+    </div>
+    <button class="save-btn" style="margin-top:14px" onclick="addStripPerson()">💾 إضافة للشريط</button>
+  </div>
+</div>
+
 <!-- إيقاف مستخدم -->
 <div id="block-user-modal" class="overlay hidden">
   <div class="modal">
@@ -1169,6 +1195,7 @@ function _initApp(id){
   db.ref("clients/"+clientId+"/shopping").on("value",snap=>{shopItems=snap.val()||{};renderShoppingPage();renderOverviewShoppingList();renderMonthlyReport();renderStats();});
   startMaidListeners();
   startChildRewardListener();
+  startStripListener();
 }
 
 function showPage(p){
@@ -1201,6 +1228,7 @@ function updateBottomNavAdmin(){
 
 function openModal(id){
   $(id).classList.remove("hidden");
+  if(id==="strip-person-modal"){buildStripColorPicker();}
   if(id==="task-modal"){
     if(!editTaskId){
       var mt=$("task-modal-title");
@@ -2273,10 +2301,10 @@ function renderMembersStrip(){
   if(!el)return;
 
   const list=Object.values(members);
-
-  // أضف الأطفال أيضاً في الشريط
   const childList=Object.values(children);
-  const allPeople=[...list,...childList];
+  const stripList=Object.values(stripPeople);
+  // دمج الكل: أفراد المهام + الأطفال + أشخاص الشريط
+  const allPeople=[...list,...childList,...stripList];
 
   if(!allPeople.length){
     if(section) section.style.display="none";
@@ -2289,15 +2317,20 @@ function renderMembersStrip(){
     const pendingTasks=isChild?0:Object.values(tasks).filter(t=>t.assignedTo===person.id&&!t.done).length;
     const stars=isChild?getChildStars(person.id):0;
     const avatarHtml=person.photoUrl
-      ?`<img src="${person.photoUrl}" style="width:60px;height:60px;border-radius:14px;object-fit:cover;border:2.5px solid ${person.color};box-shadow:0 4px 12px ${person.color}33">`
-      :`<div style="width:60px;height:60px;border-radius:14px;background:${person.color};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;box-shadow:0 4px 12px ${person.color}44">${esc(person.name).charAt(0)}</div>`;
+      ?`<img src="${person.photoUrl}" style="width:60px;height:60px;border-radius:14px;object-fit:cover;border:2.5px solid ${person.color||"#5B247A"};box-shadow:0 4px 12px ${person.color||"#5B247A"}33">`
+      :`<div style="width:60px;height:60px;border-radius:14px;background:${person.color||"var(--grad)"};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;box-shadow:0 4px 12px ${person.color||"#5B247A"}44">${esc(person.name).charAt(0)}</div>`;
 
+    const isStrip=stripPeople[person.id]!==undefined;
     const badge=isChild
       ?`<span class="member-tasks-strip">⭐ ${stars}</span>`
+      :isStrip
+      ?`<span class="member-tasks-strip">👤</span>`
       :pendingTasks>0?`<span class="member-tasks-strip" style="background:#fee2e2;color:#ef4444">${pendingTasks} مهمة</span>`
-      :`<span class="member-tasks-strip" style="background:#dcfce7;color:#059669">✓ منجز</span>`;
+      :`<span class="member-tasks-strip" style="background:#dcfce7;color:#059669">✓</span>`;
 
-    return `<div class="member-card-strip" onclick="${isChild?"showPage('schedule')":"showPage('tasks');setTimeout(()=>setTaskFilter('"+person.id+"'),100)"}">
+    const onclick=isChild?"showPage('schedule')":isStrip?"":"showPage('tasks');setTimeout(()=>setTaskFilter('"+person.id+"'),100)";
+
+    return `<div class="member-card-strip" onclick="${onclick}" style="${isStrip?"cursor:default":""}">
       ${avatarHtml}
       <div class="member-name-strip">${esc(person.name)}</div>
       ${badge}
@@ -2306,12 +2339,63 @@ function renderMembersStrip(){
 
   const cards=allPeople.map((p,i)=>makeCard(p,i>=list.length)).join("");
 
-  // نضاعف المحتوى للانيميشن اللانهائي
-  el.innerHTML=cards+cards;
+  el.innerHTML=cards;
 
   // تعديل سرعة الانيميشن حسب عدد الأشخاص
-  const speed=Math.max(15, allPeople.length*4);
+  const speed=Math.max(18, allPeople.length*3);
   el.style.animationDuration=speed+"s";
+
+  // لو عدد الأشخاص قليل — لا نحرك
+  if(allPeople.length<=3){
+    el.style.animation="none";
+    el.style.justifyContent="center";
+  } else {
+    el.style.animation="";
+    el.style.justifyContent="";
+  }
+}
+
+
+// ── STRIP PEOPLE ──
+let stripPeople={}, stripSelColor=COLORS[2];
+
+function startStripListener(){
+  db.ref("clients/"+clientId+"/stripPeople").on("value",snap=>{
+    stripPeople=snap.val()||{};
+    renderMembersStrip();
+  });
+}
+
+function buildStripColorPicker(){
+  const row=$("strip-color-picker");if(!row)return;row.innerHTML="";
+  COLORS.forEach(col=>{
+    const b=document.createElement("button");
+    b.className="color-dot"+(col===stripSelColor?" selected":"");
+    b.style.background=col;
+    b.onclick=()=>{stripSelColor=col;row.querySelectorAll(".color-dot").forEach(d=>d.classList.toggle("selected",d.style.background===col));};
+    row.appendChild(b);
+  });
+}
+
+async function addStripPerson(){
+  const name=$("strip-person-name").value.trim();
+  if(!name){$("strip-person-name").focus();return;}
+  const id=uid();
+  setSync("syncing","جاري الحفظ...");
+  const data={id,name,color:stripSelColor};
+  const photoUrl=await uploadPhoto("strip",id,"stripPeople");
+  if(photoUrl) data.photoUrl=photoUrl;
+  db.ref("clients/"+clientId+"/stripPeople/"+id).set(data);
+  $("strip-person-name").value="";
+  removePhoto("strip");
+  closeModal("strip-person-modal");
+  toast("👤 تمت إضافة "+name+" للشريط!");
+}
+
+function deleteStripPerson(id){
+  if(!confirm("حذف هذا الشخص من الشريط؟"))return;
+  deletePhoto("stripPeople",id);
+  db.ref("clients/"+clientId+"/stripPeople/"+id).remove();
 }
 
 // ── SHOPPING LIST ──
