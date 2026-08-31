@@ -1,18 +1,18 @@
 {
-  "name": "لوحة العائلة",
+  "name": "عائلتي",
   "short_name": "عائلتي",
-  "description": "نظام إدارة المهام والجداول العائلية",
+  "description": "لوحة إدارة العائلة الذكية",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3eeff",
-  "theme_color": "#5B247A",
+  "theme_color": "#2d6b6b",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
