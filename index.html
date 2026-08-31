@@ -121,9 +121,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* CHARTS */
 .donut-wrap{display:flex;align-items:center;gap:22px;}
-.donut-center{position:relative;width:120px;height:120px;flex-shrink:0;}
-.donut-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:80px;}
-.donut-pct{font-size:22px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.donut-center{position:relative;width:120px;height:120px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.donut-label{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.donut-pct{font-size:20px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;}
 .donut-sub{font-size:10px;color:var(--muted);}
 .donut-legend{display:flex;flex-direction:column;gap:10px;flex:1;}
 .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;}
@@ -247,6 +247,19 @@ textarea{resize:none;height:58px;}
 .reward-banner{background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #fcd34d;border-radius:16px;padding:18px 20px;text-align:center;animation:fadeUp .5s ease;}
 .empty-state{text-align:center;color:var(--dim);padding:34px 0;font-size:13px;}
 .empty-icon{font-size:38px;margin-bottom:10px;}
+
+/* ── CONFIRM DIALOG ── */
+#confirm-overlay{position:fixed;inset:0;background:#5B247A44;z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease;backdrop-filter:blur(4px);}
+#confirm-box{background:var(--card);border-radius:22px;padding:28px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 24px 60px #5B247A33;animation:fadeUp .25s ease;position:relative;overflow:hidden;}
+#confirm-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad);}
+#confirm-icon{font-size:48px;margin-bottom:10px;}
+#confirm-title{font-size:16px;font-weight:900;color:var(--text);margin-bottom:8px;}
+#confirm-msg{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:20px;}
+.confirm-btns{display:flex;gap:10px;}
+.confirm-btn-cancel{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card2);color:var(--muted);cursor:pointer;font-size:14px;font-family:inherit;font-weight:700;transition:all .2s;}
+.confirm-btn-cancel:hover{background:var(--card3);}
+.confirm-btn-ok{flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;cursor:pointer;font-size:14px;font-family:inherit;font-weight:700;box-shadow:0 4px 16px #ef444433;transition:all .2s;}
+.confirm-btn-ok:hover{transform:translateY(-1px);box-shadow:0 8px 20px #ef444444;}
 .hidden{display:none!important;}
 
 /* ── MEMBERS STRIP ── */
@@ -292,10 +305,10 @@ textarea{resize:none;height:58px;}
   .panel-head{padding:11px 16px;}
   .page-header{padding:12px 24px 0;}
   .page-title{font-size:20px;}
-  /* الشريط المتحرك أصغر */
-  .members-strip-wrap{padding:8px 0 2px;}
-  .member-avatar-strip{width:48px;height:48px;}
-  .member-name-strip{font-size:10px;max-width:52px;}
+  /* الشريط المتحرك على الديسكتوب */
+  .members-strip-wrap{padding:10px 0 4px;}
+  .member-avatar-strip{width:64px;height:64px;}
+  .member-name-strip{font-size:11px;max-width:68px;}
   /* الـ donut أصغر */
   .donut-center{width:100px;height:100px;}
   /* Bar chart أقل ارتفاع */
@@ -1641,10 +1654,12 @@ function toggleTask(id){
     .catch(e=>{toast("❌ خطأ في الحفظ: "+e.message);setSync("offline","خطأ في الاتصال");});
 }
 function deleteTask(id){
-  setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/tasks/"+id).remove()
-    .then(()=>setSync("online","متصل — يتزامن تلقائياً 🔄"))
-    .catch(e=>{toast("❌ خطأ في الحذف: "+e.message);setSync("offline","خطأ في الاتصال");});
+  showConfirm("هل أنت متأكد من حذف هذه المهمة؟",()=>{
+    setSync("syncing","جاري الحفظ...");
+    db.ref("clients/"+clientId+"/tasks/"+id).remove()
+      .then(()=>setSync("online","متصل — يتزامن تلقائياً 🔄"))
+      .catch(e=>{toast("❌ خطأ في الحذف: "+e.message);setSync("offline","خطأ في الاتصال");});
+  },"🗑️","حذف المهمة");
 }
 
 // ── MEMBERS ──
@@ -1670,10 +1685,11 @@ async function addMember(){
 }
 
 function deleteMember(id){
-  if(!confirm("حذف هذا الشخص؟"))return;
-  setSync("syncing","جاري الحفظ...");
-  deletePhoto("members",id);
-  db.ref("clients/"+clientId+"/members/"+id).remove();
+  showConfirm("هل أنت متأكد من حذف هذا الشخص؟",()=>{
+    setSync("syncing","جاري الحفظ...");
+    deletePhoto("members",id);
+    db.ref("clients/"+clientId+"/members/"+id).remove();
+  },"👤","حذف الشخص");
 }
 
 function renderMembersPage(){
@@ -1721,7 +1737,15 @@ async function addChild(){
   selColor=COLORS[Object.keys(children).length%COLORS.length];buildColorPicker();
   closeModal("child-modal");toast("👶 تمت إضافة "+name+"!");
 }
-function deleteChild(id){if(!confirm("حذف هذا الطفل وجدوله ونجومه؟"))return;setSync("syncing","جاري الحفظ...");deletePhoto("children",id);db.ref("clients/"+clientId+"/children/"+id).remove();db.ref("clients/"+clientId+"/schedules/"+id).remove();db.ref("clients/"+clientId+"/stars/"+id).remove();}
+function deleteChild(id){
+  showConfirm("سيتم حذف الطفل وجدوله ونجومه نهائياً، هل أنت متأكد؟",()=>{
+    setSync("syncing","جاري الحفظ...");
+    deletePhoto("children",id);
+    db.ref("clients/"+clientId+"/children/"+id).remove();
+    db.ref("clients/"+clientId+"/schedules/"+id).remove();
+    db.ref("clients/"+clientId+"/stars/"+id).remove();
+  },"👶","حذف الطفل");
+}
 
 // ── SCHEDULE ──
 function renderSchedulePage(){
@@ -2126,7 +2150,10 @@ function setMaidRating(id,rating){
 }
 
 function deleteMaidTask(id){
-  db.ref("clients/"+clientId+"/maidTasks/"+id).remove();
+  showConfirm("هل أنت متأكد من حذف هذه المهمة؟",()=>{
+    setSync("syncing","جاري الحفظ...");
+    db.ref("clients/"+clientId+"/maidTasks/"+id).remove();
+  },"🧹","حذف مهمة العاملة");
 }
 
 function resetMaidTasks(){
@@ -2642,9 +2669,11 @@ function toggleBought(id){
 }
 
 function deleteShopItem(id){
-  setSync("syncing","جاري الحفظ...");
-  db.ref("clients/"+clientId+"/shopping/"+id).remove()
-    .catch(e=>toast("❌ خطأ: "+e.message));
+  showConfirm("هل أنت متأكد من حذف هذا الغرض؟",()=>{
+    setSync("syncing","جاري الحفظ...");
+    db.ref("clients/"+clientId+"/shopping/"+id).remove()
+      .catch(e=>toast("❌ خطأ: "+e.message));
+  },"🛒","حذف الغرض");
 }
 
 function clearBoughtItems(){
@@ -3285,7 +3314,72 @@ function autoFillPersonPhoto(name, type){
   }
 }
 
-function deleteSlot(cid,sid){setSync("syncing","جاري الحفظ...");db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();}
+
+// ── CONFIRM DIALOG ──
+let _confirmCallback = null;
+
+function showConfirm(msg, callback, icon="🗑️", title="تأكيد الحذف"){
+  $("confirm-icon").textContent=icon;
+  $("confirm-title").textContent=title;
+  $("confirm-msg").textContent=msg;
+  $("confirm-overlay").style.display="flex";
+  _confirmCallback=callback;
+}
+function confirmOk(){
+  $("confirm-overlay").style.display="none";
+  if(_confirmCallback) _confirmCallback();
+  _confirmCallback=null;
+}
+function confirmCancel(){
+  $("confirm-overlay").style.display="none";
+  _confirmCallback=null;
+}
+// Close on overlay click
+$("confirm-overlay").addEventListener("click",e=>{if(e.target.id==="confirm-overlay")confirmCancel();});
+
+// ── BACK BUTTON NAVIGATION (Mobile) ──
+let pageHistory=["overview"];
+const _origShowPage=showPage;
+showPage=function(p){
+  if(p!==pageHistory[pageHistory.length-1]) pageHistory.push(p);
+  _origShowPage(p);
+  // Push state للمتصفح
+  history.pushState({page:p},"",location.pathname+"#"+p);
+};
+window.addEventListener("popstate",e=>{
+  if(pageHistory.length>1){
+    pageHistory.pop();
+    const prev=pageHistory[pageHistory.length-1];
+    _origShowPage(prev);
+  } else {
+    // الصفحة الأولى — لا تخرج
+    history.pushState({page:"overview"},"",location.pathname+"#overview");
+    _origShowPage("overview");
+  }
+});
+// Init history state
+history.replaceState({page:"overview"},"",location.pathname+"#overview");
+
+function deleteSlot(cid,sid){
+  showConfirm("هل أنت متأكد من حذف هذا النشاط؟",()=>{
+    setSync("syncing","جاري الحفظ...");
+    db.ref("clients/"+clientId+"/schedules/"+cid+"/"+sid).remove();
+    db.ref("clients/"+clientId+"/stars/"+cid+"/"+sid).remove();
+  },"📅","حذف النشاط");
+}
 </script>
+
+<!-- Confirm Dialog -->
+<div id="confirm-overlay" style="display:none">
+  <div id="confirm-box">
+    <div id="confirm-icon">🗑️</div>
+    <div id="confirm-title">تأكيد الحذف</div>
+    <div id="confirm-msg">هل أنت متأكد من الحذف؟</div>
+    <div class="confirm-btns">
+      <button class="confirm-btn-cancel" onclick="confirmCancel()">❌ إلغاء</button>
+      <button class="confirm-btn-ok" onclick="confirmOk()">✅ نعم، احذف</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
