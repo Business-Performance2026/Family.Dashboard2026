@@ -248,6 +248,22 @@ textarea{resize:none;height:58px;}
 .empty-icon{font-size:38px;margin-bottom:10px;}
 .hidden{display:none!important;}
 
+/* ── MEMBERS STRIP ── */
+.members-strip-wrap{overflow:hidden;padding:14px 0 4px;position:relative;}
+.members-strip-wrap::before{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to left,#f3eeff,transparent);z-index:2;pointer-events:none;}
+.members-strip-wrap::after{content:'';position:absolute;top:0;left:0;bottom:0;width:40px;background:linear-gradient(to right,#f3eeff,transparent);z-index:2;pointer-events:none;}
+.members-strip{display:flex;gap:14px;padding:4px 20px;animation:scrollStrip 20s linear infinite;width:max-content;}
+.members-strip:hover{animation-play-state:paused;}
+@keyframes scrollStrip{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(-50%);}
+}
+.member-card-strip{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .2s;}
+.member-card-strip:hover{transform:translateY(-4px);}
+.member-avatar-strip{width:60px;height:60px;border-radius:14px;object-fit:cover;border:2px solid var(--border2);box-shadow:0 4px 12px #5B247A18;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;}
+.member-name-strip{font-size:11px;font-weight:700;color:var(--text2);text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.member-tasks-strip{font-size:10px;color:var(--muted);background:var(--card2);border-radius:6px;padding:1px 6px;}
+
 /* ── TABLET ── */
 @media(max-width:900px){
   #sidebar{width:64px;}
@@ -436,6 +452,11 @@ textarea{resize:none;height:58px;}
         <div><div class="page-title">الشاشة الرئيسية 🏠</div><div class="page-sub" id="today-date"></div></div>
         <div style="display:flex;gap:10px"><button class="btn-grad" onclick="openFreshTaskModal()">＋ مهمة جديدة</button></div>
       </div>
+      <!-- شريط أفراد العائلة -->
+      <div class="members-strip-wrap" id="members-strip-section">
+        <div class="members-strip" id="members-strip"></div>
+      </div>
+
       <div class="stats-row">
         <div class="stat-card fadeUp" style="animation-delay:.05s"><div class="stat-stripe" style="background:var(--grad)"></div><div class="stat-icon">⚡</div><div class="stat-num" id="stat-pending" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</div><div class="stat-label">مهام معلقة</div></div>
         <div class="stat-card fadeUp" style="animation-delay:.1s"><div class="stat-stripe" style="background:linear-gradient(90deg,#059669,#34d399)"></div><div class="stat-icon">✅</div><div class="stat-num" id="stat-done" style="color:#059669">0</div><div class="stat-label">مهام مكتملة</div></div>
@@ -1205,6 +1226,7 @@ function renderAll(){
   renderTodaySchedule();renderAllTasks();renderSchedulePage();renderMembersPage();
   renderMembersOverview();renderMaidOverviewCard();
   renderShoppingPage();renderOverviewShoppingList();renderMonthlyReport();
+  renderMembersStrip();
   updateNotifBadge();
   if(isAdminUser&&isAdminUser()) renderAdminPage();
 }
@@ -2242,6 +2264,55 @@ function showPhotoInEditModal(type, currentUrl){
   }
 }
 
+
+
+// ── MEMBERS STRIP ──
+function renderMembersStrip(){
+  const el=$("members-strip");
+  const section=$("members-strip-section");
+  if(!el)return;
+
+  const list=Object.values(members);
+
+  // أضف الأطفال أيضاً في الشريط
+  const childList=Object.values(children);
+  const allPeople=[...list,...childList];
+
+  if(!allPeople.length){
+    if(section) section.style.display="none";
+    return;
+  }
+  if(section) section.style.display="block";
+
+  // بناء البطاقات — نضاعفها للانيميشن اللانهائي
+  const makeCard=(person,isChild)=>{
+    const pendingTasks=isChild?0:Object.values(tasks).filter(t=>t.assignedTo===person.id&&!t.done).length;
+    const stars=isChild?getChildStars(person.id):0;
+    const avatarHtml=person.photoUrl
+      ?`<img src="${person.photoUrl}" style="width:60px;height:60px;border-radius:14px;object-fit:cover;border:2.5px solid ${person.color};box-shadow:0 4px 12px ${person.color}33">`
+      :`<div style="width:60px;height:60px;border-radius:14px;background:${person.color};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;box-shadow:0 4px 12px ${person.color}44">${esc(person.name).charAt(0)}</div>`;
+
+    const badge=isChild
+      ?`<span class="member-tasks-strip">⭐ ${stars}</span>`
+      :pendingTasks>0?`<span class="member-tasks-strip" style="background:#fee2e2;color:#ef4444">${pendingTasks} مهمة</span>`
+      :`<span class="member-tasks-strip" style="background:#dcfce7;color:#059669">✓ منجز</span>`;
+
+    return `<div class="member-card-strip" onclick="${isChild?"showPage('schedule')":"showPage('tasks');setTimeout(()=>setTaskFilter('"+person.id+"'),100)"}">
+      ${avatarHtml}
+      <div class="member-name-strip">${esc(person.name)}</div>
+      ${badge}
+    </div>`;
+  };
+
+  const cards=allPeople.map((p,i)=>makeCard(p,i>=list.length)).join("");
+
+  // نضاعف المحتوى للانيميشن اللانهائي
+  el.innerHTML=cards+cards;
+
+  // تعديل سرعة الانيميشن حسب عدد الأشخاص
+  const speed=Math.max(15, allPeople.length*4);
+  el.style.animationDuration=speed+"s";
+}
 
 // ── SHOPPING LIST ──
 let shopFilter="all", shopCat="🥩 لحوم", shopEditId=null;
