@@ -650,7 +650,20 @@ textarea{resize:none;height:58px;}
                   <button class="btn-grad" onclick="openModal('slot-modal')">＋ إضافة نشاط</button>
                 </div>
               </div>
-              <div class="panel-body"><div class="full-week" id="full-week-grid"></div></div>
+              <div class="panel-body">
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                  <!-- صورة الطفل على اليمين -->
+                  <div id="child-schedule-photo" style="flex-shrink:0;width:90px;text-align:center;display:none">
+                    <div id="child-photo-display" style="width:90px;height:90px;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px #5B247A22;margin-bottom:8px"></div>
+                    <div id="child-photo-name" style="font-size:12px;font-weight:700;color:var(--text)"></div>
+                    <div id="child-photo-stars" style="font-size:11px;color:#d97706;margin-top:3px"></div>
+                  </div>
+                  <!-- الجدول -->
+                  <div style="flex:1;min-width:0;overflow-x:auto">
+                    <div class="full-week" id="full-week-grid"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -844,6 +857,19 @@ textarea{resize:none;height:58px;}
   <div class="modal">
     <div class="modal-title">🧹 إضافة مهمة للعاملة <button class="modal-close" onclick="closeModal('maid-task-modal')">✕</button></div>
     <div class="form-col">
+      <!-- صورة واسم الشخص -->
+      <div style="background:var(--card2);border-radius:14px;padding:12px;border:1px solid var(--border)">
+        <div class="field-label" style="margin-bottom:8px">👤 الشخص المكلّف (اختياري)</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="photo-upload-wrap" style="margin:0;width:60px;height:60px" onclick="triggerPhotoUpload('maid-person-photo-input')">
+            <img id="maid-person-photo-preview" class="photo-preview" style="width:60px;height:60px;border-radius:12px"/>
+            <div id="maid-person-photo-placeholder" class="photo-placeholder" style="width:60px;height:60px;border-radius:12px;font-size:18px">📷</div>
+            <button class="photo-del-btn" id="maid-person-photo-del" onclick="event.stopPropagation();removePhoto('maid-person')">✕</button>
+          </div>
+          <input type="file" id="maid-person-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'maid-person')"/>
+          <input type="text" id="maid-person-name" placeholder="اسم الشخص" style="flex:1;margin:0"/>
+        </div>
+      </div>
       <div><div class="field-label">اسم المهمة *</div><input type="text" id="maid-task-input" placeholder="مثال: تنظيف المطبخ"/></div>
     </div>
     <button class="save-btn" style="margin-top:14px" onclick="addMaidTask()">💾 إضافة المهمة</button>
@@ -898,6 +924,22 @@ textarea{resize:none;height:58px;}
   <div class="modal">
     <div class="modal-title"><span id="task-modal-title">➕ مهمة جديدة</span> <button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
     <div class="form-col">
+      <!-- شخص المهمة مع صورة -->
+      <div style="background:var(--card2);border-radius:14px;padding:12px;border:1px solid var(--border)">
+        <div class="field-label" style="margin-bottom:8px">👤 الشخص المسؤول</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="photo-upload-wrap" style="margin:0;width:60px;height:60px" onclick="triggerPhotoUpload('task-person-photo-input')">
+            <img id="task-person-photo-preview" class="photo-preview" style="width:60px;height:60px;border-radius:12px"/>
+            <div id="task-person-photo-placeholder" class="photo-placeholder" style="width:60px;height:60px;border-radius:12px;font-size:18px">📷</div>
+            <button class="photo-del-btn" id="task-person-photo-del" onclick="event.stopPropagation();removePhoto('task-person')">✕</button>
+          </div>
+          <input type="file" id="task-person-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'task-person')"/>
+          <div style="flex:1">
+            <input type="text" id="tf-person-name" placeholder="اسم الشخص المسؤول (اختياري)" style="margin-bottom:0"/>
+          </div>
+        </div>
+        <div style="margin-top:10px"><div class="field-label" style="margin-bottom:5px">أو اختر من القائمة</div><div id="task-assign-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+      </div>
       <div><div class="field-label">العنوان *</div><input type="text" id="tf-title" placeholder="عنوان المهمة"/></div>
       <div><div class="field-label">ملاحظة</div><textarea id="tf-note" placeholder="تفاصيل إضافية..."></textarea></div>
       <div class="form-row">
@@ -905,7 +947,6 @@ textarea{resize:none;height:58px;}
         <div style="flex:1"><div class="field-label">الوقت</div><input type="time" id="tf-time"/></div>
       </div>
       <div><div class="field-label">الأولوية</div><div class="p-btns" id="priority-btns"></div></div>
-      <div><div class="field-label">المسؤول (اختياري)</div><div id="task-assign-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div></div>
     </div>
     <input type="hidden" id="tf-edit-id"/>
     <button class="save-btn" style="margin-top:14px" id="task-save-btn" onclick="saveTask()">💾 حفظ المهمة</button>
@@ -1569,7 +1610,10 @@ function renderAllTasks(){
     const p=PC[t.priority]||PC.medium;
     const mem=t.assignedTo?members[t.assignedTo]:null;
     const d=document.createElement("div");d.className="task-row"+(t.done?" done-row":"");d.style.borderRight="3px solid "+p.color;
+    const personAvatar=t.personPhoto?`<img src="${t.personPhoto}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0">`:
+      t.personName?`<span style="background:var(--grad);color:#fff;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700">👤 ${esc(t.personName)}</span>`:"";
     d.innerHTML=`<button class="chk" onclick="toggleTask('${t.id}')">${t.done?"✅":"⬜"}</button>
+    ${personAvatar}
     <div style="flex:1"><div class="task-text${t.done?" done":""}">${esc(t.title)}</div>
     <div class="task-info">${t.date?"📅 "+t.date:""}${t.time?" ⏰ "+t.time:""}${mem?`<span style="background:${mem.color}22;color:${mem.color};border-radius:8px;padding:1px 8px;font-size:10px;font-weight:700">👤 ${esc(mem.name)}</span>`:""}</div></div>
     <span class="p-pill" style="background:${p.bg};color:${p.color}">${p.label}</span>
@@ -1683,6 +1727,19 @@ function renderSchedulePage(){
   $("child-total-stars").textContent=ts>0?`${ts} ⭐ إجمالي النجوم`:"";
   $("del-child-btn").onclick=()=>deleteChild(activeChild);
   const ecb=$("edit-child-btn");if(ecb)ecb.onclick=()=>openEditChildModal(activeChild);
+  // عرض صورة الطفل بجانب الجدول
+  const photoSection=$("child-schedule-photo");
+  const photoDisplay=$("child-photo-display");
+  const photoName=$("child-photo-name");
+  const photoStars=$("child-photo-stars");
+  if(photoSection&&photoDisplay){
+    photoSection.style.display="block";
+    photoDisplay.innerHTML=child.photoUrl
+      ?`<img src="${child.photoUrl}" style="width:90px;height:90px;object-fit:cover">`
+      :`<div style="width:90px;height:90px;background:${child.color};display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#fff">${esc(child.name).charAt(0)}</div>`;
+    if(photoName) photoName.textContent=child.name+(child.age?" ("+child.age+")":"");
+    if(photoStars) photoStars.textContent=ts>0?ts+" ⭐":"";
+  }
   const grid=$("full-week-grid");grid.innerHTML="";
   const slots=schedules[activeChild]?Object.values(schedules[activeChild]):[];
   const cs=stars[activeChild]||{};
@@ -1906,28 +1963,36 @@ function openEditTask(id){
   openModal("task-modal");
 }
 
-function saveTask(){
+async function saveTask(){
   const title=$("tf-title").value.trim();if(!title){$("tf-title").focus();return;}
+  const personName=($("tf-person-name")&&$("tf-person-name").value||"").trim();
+
   if(editTaskId){
-    // تعديل
     const data={title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority};
     if(selAssign) data.assignedTo=selAssign; else data.assignedTo=null;
+    if(personName) data.personName=personName;
+    // رفع صورة الشخص لو موجودة
+    const photoUrl=await uploadPhoto("task-person",editTaskId,"taskPersons");
+    if(photoUrl) data.personPhoto=photoUrl;
     setSync("syncing","جاري الحفظ...");
     db.ref("clients/"+clientId+"/tasks/"+editTaskId).update(data);
     editTaskId=null;
     toast("✏️ تم تعديل المهمة!");
   } else {
-    // إضافة جديدة
     const id=uid();setSync("syncing","جاري الحفظ...");
     const data={id,title,note:$("tf-note").value.trim(),date:$("tf-date").value,time:$("tf-time").value,priority:selPriority,done:false};
     if(selAssign) data.assignedTo=selAssign;
+    if(personName) data.personName=personName;
+    // رفع صورة الشخص
+    const photoUrl=await uploadPhoto("task-person",id,"taskPersons");
+    if(photoUrl) data.personPhoto=photoUrl;
     db.ref("clients/"+clientId+"/tasks/"+id).set(data);
     toast("✅ تمت إضافة المهمة!");
   }
-  ["tf-title","tf-note","tf-date","tf-time"].forEach(x=>$(x).value="");
+  ["tf-title","tf-note","tf-date","tf-time","tf-person-name"].forEach(x=>{const el=$(x);if(el)el.value="";});
+  removePhoto("task-person");
   selPriority="medium";selAssign=null;
   buildPriorityBtns();
-  // Reset title
   var mt=$("task-modal-title");
   if(mt) mt.textContent="➕ مهمة جديدة";
   closeModal("task-modal");
@@ -2013,12 +2078,19 @@ function startMaidListeners(){
   db.ref("clients/"+clientId+"/maidReward").once("value",snap=>{if(snap.val())maidReward=snap.val();});
 }
 
-function addMaidTask(){
+async function addMaidTask(){
   const title=$("maid-task-input").value.trim();
   if(!title){$("maid-task-input").focus();return;}
   const id=uid();
-  db.ref("clients/"+clientId+"/maidTasks/"+id).set({id,title,done:false,rating:0,date:getTodayStr()});
+  const personName=($("maid-person-name")&&$("maid-person-name").value||"").trim();
+  const data={id,title,done:false,rating:0,date:getTodayStr()};
+  if(personName) data.personName=personName;
+  const photoUrl=await uploadPhoto("maid-person",id,"maidPersons");
+  if(photoUrl) data.personPhoto=photoUrl;
+  db.ref("clients/"+clientId+"/maidTasks/"+id).set(data);
   $("maid-task-input").value="";
+  if($("maid-person-name")) $("maid-person-name").value="";
+  removePhoto("maid-person");
   closeModal("maid-task-modal");toast("🧹 تمت إضافة المهمة!");
 }
 
@@ -2158,10 +2230,14 @@ function renderMaidPage(){
       const filled=i<(t.rating||0);
       return `<button class="star-btn" onclick="setMaidRating('${t.id}',${i+1})">${filled?"⭐":"☆"}</button>`;
     }).join("");
+    const maidAvatar=t.personPhoto?`<img src="${t.personPhoto}" style="width:32px;height:32px;border-radius:10px;object-fit:cover;flex-shrink:0;border:2px solid var(--border2)">`:
+      t.personName?`<div style="width:32px;height:32px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">${esc(t.personName).charAt(0)}</div>`:"";
     row.innerHTML=`
       <button class="chk" onclick="toggleMaidTask('${t.id}')" style="font-size:20px;padding:0;background:none;border:none;cursor:pointer;flex-shrink:0">${t.done?"✅":"⬜"}</button>
+      ${maidAvatar}
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:var(--text);${t.done?"text-decoration:line-through;opacity:.6":""}">${esc(t.title)}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);${t.done?"text-decoration:line-through;opacity:.6":""}">${esc(t.title)}${t.personName&&!t.personPhoto?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-right:6px"> · ${esc(t.personName)}</span>`:""}
+        </div>
         <div class="star-rating" style="margin-top:5px">${stars}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
