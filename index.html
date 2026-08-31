@@ -247,22 +247,100 @@ textarea{resize:none;height:58px;}
 .empty-icon{font-size:38px;margin-bottom:10px;}
 .hidden{display:none!important;}
 
+/* ── TABLET ── */
 @media(max-width:900px){
-  #sidebar{width:62px;}
+  #sidebar{width:64px;}
   .sidebar-logo-text,.sidebar-client,.nav-item span,.logout-label{display:none;}
-  .nav-item{justify-content:center;padding:12px;}
-  #app-wrap{margin-right:62px;}
+  .nav-item{justify-content:center;padding:13px 0;}
+  #app-wrap{margin-right:64px;}
   .stats-row{grid-template-columns:repeat(2,1fr);}
   .content-grid{grid-template-columns:1fr;}
+  .page-header{padding:20px 18px 0;}
+  .content-grid{padding:12px 18px;}
 }
+
+/* ── MOBILE ── */
 @media(max-width:600px){
-  #sidebar{display:none;}#app-wrap{margin-right:0;}
-  .stats-row{grid-template-columns:repeat(2,1fr);padding:14px;}
-  .content-grid,.child-tab-row{padding:14px;}
-  .page-header{padding:16px 14px 0;}
-  .full-week{grid-template-columns:repeat(7,minmax(52px,1fr));overflow-x:auto;}
-  .auth-box{padding:32px 22px;}
+  /* إخفاء السايدبار وإظهار Bottom Nav */
+  #sidebar{display:none!important;}
+  #app-wrap{margin-right:0;padding-bottom:75px;}
+  #bottom-nav{display:flex!important;}
+
+  /* تعديلات عامة */
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:10px;padding:12px 14px 0;}
+  .stat-card{padding:14px 12px;}
+  .stat-num{font-size:24px;}
+  .content-grid,.child-tab-row{padding:10px 14px;}
+  .content-grid{gap:10px;}
+  .page-header{padding:14px 14px 0;gap:8px;}
+  .page-title{font-size:18px;}
+  .panel-body{padding:14px;}
+  .panel-head{padding:12px 14px;}
+
+  /* جدول الأطفال */
+  .full-week{grid-template-columns:repeat(7,minmax(110px,1fr));overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .fw-head{font-size:10px;padding:6px 3px;}
+  .fw-slot{padding:6px;}
+  .fw-slot-subj{font-size:9px;}
+
+  /* Auth */
+  .auth-box{padding:28px 18px;margin:10px;}
+  .auth-title{font-size:20px;}
+
+  /* Modals */
+  .overlay{padding:10px;align-items:flex-end;}
+  .modal{border-radius:22px 22px 0 0;max-height:92vh;padding:22px 18px 30px;}
+  .modal::before{border-radius:22px 22px 0 0;}
+
+  /* Tasks */
+  .task-row{padding:10px 12px;gap:8px;}
+  .task-text{font-size:12px;}
+  .task-filter-row{padding:0 0 8px;}
+
+  /* Buttons */
+  .btn-grad{padding:8px 14px;font-size:12px;}
+  .btn-outline{padding:6px 10px;font-size:11px;}
+
+  /* Toast */
+  #toast{width:90%;text-align:center;white-space:normal;font-size:12px;}
+
+  /* Notif bar */
+  #notif-bar{padding:5px 14px;}
+
+  /* Shopping */
+  .code-item{flex-wrap:wrap;gap:6px;}
+
+  /* Page header buttons */
+  .page-header > div:last-child{flex-wrap:wrap;}
 }
+
+/* ── Bottom Navigation Bar (Mobile Only) ── */
+#bottom-nav{
+  display:none;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  z-index:300;
+  padding:6px 0 env(safe-area-inset-bottom,6px);
+  box-shadow:0 -4px 20px #5B247A14;
+}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 4px;cursor:pointer;border:none;background:none;
+  font-family:inherit;font-size:9px;color:var(--muted);
+  transition:all .2s;position:relative;
+}
+.bnav-item.active{color:var(--grad-start);}
+.bnav-item.active .bnav-icon{
+  background:linear-gradient(135deg,#f5eeff,#edfcff);
+  border-radius:14px;
+  padding:4px 16px;
+}
+.bnav-icon{font-size:20px;transition:all .2s;padding:4px 16px;}
+.bnav-label{font-size:9px;font-weight:600;line-height:1;}
 </style>
 </head>
 <body>
@@ -662,6 +740,41 @@ textarea{resize:none;height:58px;}
   </div>
 </div>
 
+<!-- Bottom Navigation (Mobile Only) -->
+<nav id="bottom-nav">
+  <button class="bnav-item active" id="bnav-overview" onclick="showPage('overview')">
+    <div class="bnav-icon">🏠</div>
+    <span class="bnav-label">الرئيسية</span>
+  </button>
+  <button class="bnav-item" id="bnav-tasks" onclick="showPage('tasks')">
+    <div class="bnav-icon">✅</div>
+    <span class="bnav-label">المهام</span>
+  </button>
+  <button class="bnav-item" id="bnav-shopping" onclick="showPage('shopping')">
+    <div class="bnav-icon">🛒</div>
+    <span class="bnav-label">التسوق</span>
+  </button>
+  <button class="bnav-item" id="bnav-schedule" onclick="showPage('schedule')">
+    <div class="bnav-icon">🌟</div>
+    <span class="bnav-label">الأطفال</span>
+  </button>
+  <button class="bnav-item" id="bnav-more" onclick="toggleMoreMenu()">
+    <div class="bnav-icon">☰</div>
+    <span class="bnav-label">المزيد</span>
+  </button>
+</nav>
+
+<!-- More Menu (Mobile) -->
+<div id="more-menu" style="display:none;position:fixed;bottom:70px;left:0;right:0;background:var(--card);border-top:1px solid var(--border);border-radius:20px 20px 0 0;z-index:299;padding:16px 14px;box-shadow:0 -8px 30px #5B247A18;animation:fadeUp .2s ease">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button onclick="showPage('members');toggleMoreMenu()" style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text)"><span style="font-size:22px">👤</span>توكيل مهام</button>
+    <button onclick="showPage('maid');toggleMoreMenu()" style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text)"><span style="font-size:22px">🧹</span>العاملة</button>
+    <button id="bnav-admin-btn" style="display:none;align-items:center;gap:10px;padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text)" onclick="showPage('admin');toggleMoreMenu()"><span style="font-size:22px">🛡️</span>الإدارة</button>
+    <button onclick="doLogout()" style="display:flex;align-items:center;gap:10px;padding:14px;background:#fee2e2;border:1px solid #fca5a5;border-radius:14px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#ef4444"><span style="font-size:22px">🚪</span>خروج</button>
+  </div>
+</div>
+<div id="more-overlay" style="display:none;position:fixed;inset:0;z-index:298;background:#00000022" onclick="toggleMoreMenu()"></div>
+
 <!-- MODALS -->
 <!-- مهمة عاملة يدوية -->
 <div id="maid-task-modal" class="overlay hidden">
@@ -1019,6 +1132,7 @@ function _initApp(id){
   // إظهار قسم الإدارة للمدير فقط
   const adminNav=$("nav-admin");
   if(adminNav) adminNav.style.display=id===ADMIN_USER?"flex":"none";
+  setTimeout(updateBottomNavAdmin,500);
   buildPriorityBtns();buildColorPicker();buildDayPicker();buildQuickSubj();
   if(typeof Notification!=="undefined"&&Notification.permission==="default")Notification.requestPermission();
   window.addEventListener("offline",()=>setSync("offline","غير متصل"));
@@ -1039,7 +1153,27 @@ function showPage(p){
     const pe=$("page-"+id);if(pe)pe.classList.toggle("hidden",id!==p);
     const ne=$("nav-"+id);if(ne)ne.classList.toggle("active",id===p);
   });
+  // Update bottom nav
+  ["overview","tasks","shopping","schedule"].forEach(id=>{
+    const bn=$("bnav-"+id);if(bn)bn.classList.toggle("active",id===p);
+  });
+  const bMore=$("bnav-more");
+  if(bMore) bMore.classList.toggle("active",["members","maid","admin"].includes(p));
   renderAll();
+}
+
+function toggleMoreMenu(){
+  const menu=$("more-menu"),overlay=$("more-overlay");
+  if(!menu)return;
+  const open=menu.style.display==="none";
+  menu.style.display=open?"block":"none";
+  overlay.style.display=open?"block":"none";
+}
+
+// Show admin button in more menu if admin
+function updateBottomNavAdmin(){
+  const btn=$("bnav-admin-btn");
+  if(btn) btn.style.display=isAdminUser()?"flex":"none";
 }
 
 function openModal(id){
