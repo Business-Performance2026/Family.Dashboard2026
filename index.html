@@ -1297,6 +1297,8 @@ function _initApp(id){
   startPersonPhotosListener();
 }
 
+let _pageHistory=["overview"];
+
 function showPage(p){
   ["overview","tasks","members","shopping","maid","schedule","admin"].forEach(id=>{
     const pe=$("page-"+id);if(pe)pe.classList.toggle("hidden",id!==p);
@@ -1308,8 +1310,38 @@ function showPage(p){
   });
   const bMore=$("bnav-more");
   if(bMore) bMore.classList.toggle("active",["members","maid","admin"].includes(p));
+  // Track history for back button
+  if(p!==_pageHistory[_pageHistory.length-1]){
+    _pageHistory.push(p);
+    history.pushState({page:p},"",location.pathname+"#"+p);
+  }
   renderAll();
 }
+
+// Back button handler
+window.addEventListener("popstate",function(e){
+  if(_pageHistory.length>1){
+    _pageHistory.pop();
+    const prev=_pageHistory[_pageHistory.length-1]||"overview";
+    // Call showPage internals without pushing to history
+    ["overview","tasks","members","shopping","maid","schedule","admin"].forEach(id=>{
+      const pe=$("page-"+id);if(pe)pe.classList.toggle("hidden",id!==prev);
+      const ne=$("nav-"+id);if(ne)ne.classList.toggle("active",id===prev);
+    });
+    ["overview","tasks","shopping","schedule"].forEach(id=>{
+      const bn=$("bnav-"+id);if(bn)bn.classList.toggle("active",id===prev);
+    });
+    const bMore=$("bnav-more");
+    if(bMore) bMore.classList.toggle("active",["members","maid","admin"].includes(prev));
+    renderAll();
+  } else {
+    // منع الخروج — ارجع للرئيسية
+    history.pushState({page:"overview"},"",location.pathname+"#overview");
+    showPage("overview");
+  }
+});
+// Init
+setTimeout(()=>history.replaceState({page:"overview"},"",location.pathname+"#overview"),100);
 
 function toggleMoreMenu(){
   const menu=$("more-menu"),overlay=$("more-overlay");
@@ -3337,28 +3369,7 @@ function confirmCancel(){
 // Close on overlay click
 $("confirm-overlay").addEventListener("click",e=>{if(e.target.id==="confirm-overlay")confirmCancel();});
 
-// ── BACK BUTTON NAVIGATION (Mobile) ──
-let pageHistory=["overview"];
-const _origShowPage=showPage;
-showPage=function(p){
-  if(p!==pageHistory[pageHistory.length-1]) pageHistory.push(p);
-  _origShowPage(p);
-  // Push state للمتصفح
-  history.pushState({page:p},"",location.pathname+"#"+p);
-};
-window.addEventListener("popstate",e=>{
-  if(pageHistory.length>1){
-    pageHistory.pop();
-    const prev=pageHistory[pageHistory.length-1];
-    _origShowPage(prev);
-  } else {
-    // الصفحة الأولى — لا تخرج
-    history.pushState({page:"overview"},"",location.pathname+"#overview");
-    _origShowPage("overview");
-  }
-});
-// Init history state
-history.replaceState({page:"overview"},"",location.pathname+"#overview");
+
 
 function deleteSlot(cid,sid){
   showConfirm("هل أنت متأكد من حذف هذا النشاط؟",()=>{
